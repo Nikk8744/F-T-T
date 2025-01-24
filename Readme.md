@@ -16,6 +16,9 @@
 - typeorm migration
 - prisma migration
 
+#### Services and Controllers
+##### Why to separate them
+controllers are responsible for handling HTTP-specific tasks, like getting data from the request, validating input (though the user isn't doing validation yet), and sending responses. Services, on the other hand, handle the application's business logic, interacting with the database, performing calculations, and other operations that aren't tied to the web layer. This separation allows reusing services in different parts of the application, like in CLI tools or other controllers, without duplicating code.
 
 ### tables
 #### users
