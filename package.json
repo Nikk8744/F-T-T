@@ -9,7 +9,8 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "server": "nodemon src/index.ts",
-    "migrateAll": "npx kysely-ctl migrate:latest"
+    "migrateAll": "npx kysely-ctl migrate:latest",
+    "codegen": "kysely-codegen --dialect mysql --camel-case --out-file  src/utils/kysely-types.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +28,8 @@
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.10.8",
+    "@types/node": "^22.10.10",
+    "kysely-codegen": "^0.17.0",
     "kysely-ctl": "^0.10.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",

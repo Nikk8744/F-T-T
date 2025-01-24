@@ -9,22 +9,27 @@ export async function up(db: Kysely<any>): Promise<void> {
 			.addColumn('start_date', 'datetime', col => col.notNull())
 			.addColumn('end_date', 'datetime', col => col.notNull())
 			.addColumn('status', 'varchar(20)', col => col.defaultTo('Pending').check(sql`status IN('Pending', 'In-Progress', 'Completed')`))
-			.addColumn('user_id', 'integer', col => col.notNull().references('users.id').onDelete('cascade'))
+			.addColumn('user_id', 'integer', col => col.notNull())
 			.addColumn('total_hours', 'decimal', col => col.defaultTo(0))
 			.addColumn('created_at', 'timestamp', col => 
 				col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
 			)
 			.addColumn('updated_at', 'timestamp', col => 
 				col.defaultTo(sql`CURRENT_TIMESTAMP`)
-				.$call(column => 
-					// Raw SQL for ON UPDATE
-					column.modifyEnd(sql`ON UPDATE CURRENT_TIMESTAMP`)
-				)
+				.$call(column => column.modifyEnd(sql`ON UPDATE CURRENT_TIMESTAMP`))
 				.notNull()
 			)
 			.addCheckConstraint('end_date_after_start_date', 
 				sql`end_date >= start_date`
 			)
+			// relationship rule between projects table and users. so that if a user gets deleted, automatically delete all their projects too!
+			.addForeignKeyConstraint(
+				'projects_user_fk',
+				['user_id'], 
+				'users',
+				['id'],
+				(cb) => cb.onDelete('cascade')
+			  )
 			.execute()
 }
 

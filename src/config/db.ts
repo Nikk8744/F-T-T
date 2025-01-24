@@ -1,16 +1,7 @@
 import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2";
+import { DB } from "../utils/kysely-types";
 
-
-
-// const pool = createPool({
-//     database: "test",
-//     user: "root",
-//     password: "Wellcome@123",
-//     host: "localhost",
-//     port: 3308,
-//     connectionLimit: 10,
-// });
 
 export const dialect = new MysqlDialect({
     pool: createPool({
@@ -23,7 +14,7 @@ export const dialect = new MysqlDialect({
     }),
   });
 
-export const db = new Kysely({
+export const db = new Kysely<DB>({
     dialect,
 })
 
