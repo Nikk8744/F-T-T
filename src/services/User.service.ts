@@ -1,42 +1,79 @@
-import { Insertable } from "kysely"
-import { db } from "../config/db"
-import { DB } from "../utils/kysely-types"
+import { Insertable, Updateable } from "kysely";
+import { db } from "../config/db";
+import { DB } from "../utils/kysely-types";
 
 export const userServices = {
-    async createUser(user: Insertable<DB['users']>) {
-        const existingUser = await db
-        .selectFrom('users')
-        .where('email', '=', user.email)
-        // .orWhere('userName', '=', user.userName)
-        .select(['email', 'userName'])
-        .executeTakeFirst();
+  async createUser(user: Insertable<DB["users"]>) {
+    const existingUser = await db
+      .selectFrom("users")
+      .where("email", "=", user.email)
+      // .orWhere('userName', '=', user.userName)
+      .select(["email", "userName"])
+      .executeTakeFirst();
 
-        if (existingUser) {
-        if (existingUser.email === user.email) {
-            throw new Error('Email already exists');
-        }
-        if (existingUser.userName === user.userName) {
-            throw new Error('Username already exists');
-        }
-        }
-
-        return db
-            .insertInto('users')
-            .values(user)
-            .returningAll()
-            .executeTakeFirstOrThrow()
-    },
-
-    async getUserById(id: number) {
-        return db
-            .selectFrom('users')
-            .selectAll()
-            .where('id', '=', id)
-            .executeTakeFirstOrThrow()
+    if (existingUser) {
+      if (existingUser.email === user.email) {
+        throw new Error("Email already exists");
+      }
+      if (existingUser.userName === user.userName) {
+        throw new Error("Username already exists");
+      }
     }
-}
 
+    const insertResult = await db
+        .insertInto("users")
+        .values(user)
+        .executeTakeFirstOrThrow();
 
+    return db
+      .selectFrom("users")
+      .selectAll()
+      .where('id', '=', Number(insertResult.insertId))
+      .executeTakeFirstOrThrow();
+  },
+
+  async getUserById(id: number) {
+    return db
+      .selectFrom("users")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+  },
+
+  async updateUser(id: number, updates: Updateable<DB["users"]>){
+    
+    const existingUser = await this.getUserById(id);
+    if (!existingUser) {
+        throw new Error("User not found");
+    }
+    // to check if the updated email already exists or not
+    // const existingEmail = await db
+    // .selectFrom("users")
+    // .where("email", "=", user.email)
+    // .select(["email", "userName"])
+    // .executeTakeFirst();
+    
+    await db   
+        .updateTable("users")
+        .set(updates)
+        .where("id", "=", id)
+        .executeTakeFirstOrThrow();
+
+    return this.getUserById(id);
+  },
+
+  async deleteUser(id: number) {
+    const existingUser = await this.getUserById(id);
+    if (!existingUser) {
+        throw new Error("User not found");
+    }
+
+    await db.deleteFrom("users").where('id', '=', id).executeTakeFirstOrThrow();
+
+    return true;
+  }
+
+};
 
 // import { db } from '../utils/db';
 // import type { Insertable } from 'kysely';
