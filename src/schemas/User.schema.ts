@@ -19,3 +19,8 @@ export const UserUpdateSchema = UserCreateSchema
     role: z.enum(['user', 'admin']).optional()
   })
   .strict();
+ 
+export const LoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(6)
+  });

@@ -1,12 +1,17 @@
 import { Insertable, Updateable } from "kysely";
 import { db } from "../config/db";
 import { DB } from "../utils/kysely-types";
+import { hashPassword } from "../utils/passwordHash";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export const userServices = {
   async createUser(user: Insertable<DB["users"]>) {
+
+    const hashedUser = await hashPassword.hash(user);
+
     const existingUser = await db
       .selectFrom("users")
-      .where("email", "=", user.email)
+      .where("email", "=", hashedUser.email)
       // .orWhere('userName', '=', user.userName)
       .select(["email", "userName"])
       .executeTakeFirst();
@@ -22,7 +27,7 @@ export const userServices = {
 
     const insertResult = await db
         .insertInto("users")
-        .values(user)
+        .values(hashedUser)
         .executeTakeFirstOrThrow();
 
     return db
@@ -41,7 +46,8 @@ export const userServices = {
   },
 
   async updateUser(id: number, updates: Updateable<DB["users"]>){
-    
+
+    // const hashedUpdates = await passwordUtils.hash(updates);
     const existingUser = await this.getUserById(id);
     if (!existingUser) {
         throw new Error("User not found");
@@ -71,6 +77,52 @@ export const userServices = {
     await db.deleteFrom("users").where('id', '=', id).executeTakeFirstOrThrow();
 
     return true;
+  },
+
+  async authenticateService (email: string, password: string) {
+    const user = await db
+      .selectFrom("users")
+      .selectAll()
+      .where("email", "=", email)
+      .executeTakeFirst();
+
+    if (!user || !user.password) throw new Error("Invalid credentials");
+
+    const isValid = await hashPassword.compare(password, user.password)
+    if (!isValid) {
+        throw new Error("Invalid email Email or Password");
+    }
+    return user;
+  },
+
+  async generateAuthTokens (user: {id: number, role: string}){
+
+    const accessTokenSecret: string = process.env.ACCESS_TOKEN_SECRET || "default-access-token-secret";
+    // const refreshTokenSecret: jwt.Secret = process.env.REFRESH_TOKEN_SECRET || "default-refresh-token-secret";
+    
+    // Use a default expiry if ACCESS_TOKEN_EXPIRY is not set
+    const accessTokenExpiry: string = process.env.ACCESS_TOKEN_EXPIRY || "15m"; 
+
+    const accessToken = jwt.sign(
+        {id: user.id, role: user.role},
+        accessTokenSecret,
+        { expiresIn: accessTokenExpiry } as SignOptions
+    )
+    
+    const refreshToken = jwt.sign(
+        { id: user.id },
+        process.env.REFRESH_TOKEN_SECRET || "hhellorefresh",
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY || "15m" } as SignOptions
+      );
+
+      await db
+      .updateTable("users")
+      .set({ refreshToken })
+      .where("id", "=", user.id)
+      .execute();
+
+    return {accessToken, refreshToken}
+  
   }
 
 };
