@@ -27,11 +27,14 @@ app.use(express.urlencoded({extended: false}));
 
 // import routes
 import userRoutes from './routes/user.routes';
-import projectRoutes from './routes/project.routes'
+import projectRoutes from './routes/project.routes';
+import projectMemberRoutes from './routes/projectMembers.routes';
 
 // use routes
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/project', projectRoutes);
+app.use('/api/v1/projectMember', projectMemberRoutes);
+
 
 
 app.listen(process.env.PORT, () => {

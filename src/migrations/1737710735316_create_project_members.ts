@@ -5,7 +5,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 	// note: up migrations are mandatory. you must implement this function.
 	// For more info, see: https://kysely.dev/docs/migrations
 	await db.schema
-			.createTable('project_members')
+			.createTable('projectmembers')
 			.addColumn('projectId', 'integer', col => 
 				col.references('projects.id').onDelete('cascade').notNull()
 			)
@@ -17,5 +17,5 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-	await db.schema.dropTable('project_members').execute()
+	await db.schema.dropTable('projectmembers').execute()
 }

@@ -2,7 +2,7 @@ import { Kysely, sql } from 'kysely'
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
-    .createTable('task_checklists')
+    .createTable('taskchecklists')
     .addColumn('id', 'integer', col => col.autoIncrement().primaryKey())
     .addColumn('taskId', 'integer', col => 
       col.references('tasks.id').onDelete('cascade').notNull()
@@ -16,5 +16,5 @@ export async function up(db: Kysely<any>): Promise<void> {
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.dropTable('task_checklists').execute()
+  await db.schema.dropTable('taskchecklists').execute()
 }
