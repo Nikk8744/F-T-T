@@ -6,33 +6,33 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('id', 'integer', col => col.autoIncrement().primaryKey())
     .addColumn('name', 'varchar(255)')
     .addColumn('description', 'text')
-    .addColumn('start_time', 'datetime', col => col.notNull())
-    .addColumn('end_time', 'datetime')
-	.addColumn('user_id', 'integer', col => col.notNull())
-	.addColumn('project_id', 'integer', col => col.notNull())
-	.addColumn('task_id', 'integer', col => col.notNull())
-    .addColumn('time_spent', 'integer', col => col.notNull().defaultTo(0))
-    .addColumn('created_at', 'timestamp', col => 
+    .addColumn('startTime', 'datetime', col => col.notNull())
+    .addColumn('endTime', 'datetime')
+	.addColumn('userId', 'integer', col => col.notNull())
+	.addColumn('projectId', 'integer', col => col.notNull())
+	.addColumn('taskId', 'integer', col => col.notNull())
+    .addColumn('timeSpent', 'integer', col => col.notNull().defaultTo(0))
+    .addColumn('createdAt', 'timestamp', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     // Relationships
     .addForeignKeyConstraint(
       'timelogs_project_fk',
-      ['project_id'],
+      ['projectId'],
       'projects',
       ['id'],
       (cb) => cb.onDelete('cascade')
     )
     .addForeignKeyConstraint(
       'timelogs_user_fk',
-      ['user_id'],
+      ['userId'],
       'users',
       ['id'],
       (cb) => cb.onDelete('cascade')
     )
     .addForeignKeyConstraint(
       'timelogs_task_fk',
-      ['task_id'],
+      ['taskId'],
       'tasks',
       ['id'],
       (cb) => cb.onDelete('cascade')

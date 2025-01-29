@@ -4,12 +4,12 @@ import { LoginSchema, UserCreateSchema, UserUpdateSchema } from "../schemas/User
 import { db } from "../config/db";
 
 
-interface LogoutRequest extends Request {
-  user?: {
-    id: number;
-    // ... other user properties
-  };
-}
+// interface LogoutRequest extends Request {
+//   user?: {
+//     id: number;
+//     // ... other user properties
+//   };
+// }
 
 
 const createUser = async (req: Request, res: Response) => {
@@ -110,7 +110,7 @@ const login = async (req: Request, res: Response) => {
         })
 }
 
-const logout = async(req: LogoutRequest, res: Response) => {
+const logout = async(req: /*LogoutRequest*/Request, res: Response) => {
     const options = {
         httpsOnly: true, 
         secure: true 

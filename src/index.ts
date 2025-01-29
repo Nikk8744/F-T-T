@@ -5,6 +5,18 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
+declare global {
+    namespace Express {
+      interface Request {
+        user?: {
+          id: number;
+          role: string;
+          // Add other user properties as needed
+        };
+      }
+    }
+  }
+
 app.get("/", (req, res) => {
     res.send("Hello broo")
 });
@@ -15,9 +27,12 @@ app.use(express.urlencoded({extended: false}));
 
 // import routes
 import userRoutes from './routes/user.routes';
+import projectRoutes from './routes/project.routes'
 
 // use routes
 app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/project', projectRoutes);
+
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on port: http://localhost:${process.env.PORT}`);

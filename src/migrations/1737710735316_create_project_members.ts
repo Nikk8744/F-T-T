@@ -6,13 +6,13 @@ export async function up(db: Kysely<any>): Promise<void> {
 	// For more info, see: https://kysely.dev/docs/migrations
 	await db.schema
 			.createTable('project_members')
-			.addColumn('project_id', 'integer', col => 
+			.addColumn('projectId', 'integer', col => 
 				col.references('projects.id').onDelete('cascade').notNull()
 			)
-			.addColumn('user_id', 'integer', col => 
+			.addColumn('userId', 'integer', col => 
 				col.references('users.id').onDelete('cascade').notNull()
 			)
-			.addPrimaryKeyConstraint('project_members_pk', ['project_id', 'user_id'])
+			.addPrimaryKeyConstraint('project_members_pk', ['projectId', 'userId'])
 			.execute()
 }
 

@@ -4,12 +4,12 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('task_checklists')
     .addColumn('id', 'integer', col => col.autoIncrement().primaryKey())
-    .addColumn('task_id', 'integer', col => 
+    .addColumn('taskId', 'integer', col => 
       col.references('tasks.id').onDelete('cascade').notNull()
     )
     .addColumn('item', 'varchar(255)', col => col.notNull())
-    .addColumn('is_completed', 'boolean', col => col.defaultTo(false))
-    .addColumn('created_at', 'timestamp', col => 
+    .addColumn('isCompleted', 'boolean', col => col.defaultTo(false))
+    .addColumn('createdAt', 'timestamp', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
     .execute()

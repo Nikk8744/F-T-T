@@ -9,17 +9,17 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('status', 'varchar(20)', col => 
       col.defaultTo('Pending').check(sql`status IN ('Pending', 'In-Progress', 'Done')`)
     )
-    .addColumn('start_date', 'datetime', col => 
+    .addColumn('startDate', 'datetime', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn('due_date', 'datetime')
-    .addColumn('total_time_spent', 'integer', col => col.defaultTo(0))
-	.addColumn('assigned_user_id', 'integer', col => col.notNull())
-	.addColumn('project_id', 'integer', col => col.notNull())
-    .addColumn('created_at', 'timestamp', col => 
+    .addColumn('dueDate', 'datetime')
+    .addColumn('totalTimeSpent', 'integer', col => col.defaultTo(0))
+	.addColumn('assignedUserId', 'integer', col => col.notNull())
+	.addColumn('projectId', 'integer', col => col.notNull())
+    .addColumn('createdAt', 'timestamp', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
     )
-    .addColumn('updated_at', 'timestamp', col => 
+    .addColumn('updatedAt', 'timestamp', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`)
         .$call(column => column.modifyEnd(sql`ON UPDATE CURRENT_TIMESTAMP`))
         .notNull()
@@ -27,14 +27,14 @@ export async function up(db: Kysely<any>): Promise<void> {
     // Relationships
     .addForeignKeyConstraint(
       'tasks_assigned_user_fk',
-      ['assigned_user_id'],
+      ['assignedUserId'],
       'users',
       ['id'],
       (cb) => cb.onDelete('cascade')
     )
     .addForeignKeyConstraint(
       'tasks_project_fk',
-      ['project_id'],
+      ['projectId'],
       'projects',
       ['id'],
       (cb) => cb.onDelete('cascade')
