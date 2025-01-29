@@ -30,6 +30,10 @@ const createUser = async (req: Request, res: Response) => {
         })
     } catch (error) {
         // return 
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
         res.status(500).json({msg: "Internal server error occurred"});
     }
 }
@@ -88,26 +92,34 @@ const login = async (req: Request, res: Response) => {
 
     const { email, password } = LoginSchema.parse(req.body);
 
-    const user = await userServices.authenticateService(email, password);
-    if (!user) {
-        res.status(400).json({ msg: "Invalid email or password!!" });
+    try {
+        const user = await userServices.authenticateService(email, password);
+        if (!user) {
+            res.status(400).json({ msg: "Invalid email or password!!" });
+        }
+    
+        const tokens = await userServices.generateAuthTokens(user)
+        const options = {
+            httpsOnly: true, // this prevents frontend from accessing cookie
+            secure: true // this makes sure ke cookie sirf secure env se transmit horhi hai
+        }
+    
+        const { password: _, refreshToken: __, ...safeUser } = user;
+    
+        res.status(200)
+            .cookie("accessToken", tokens.accessToken, options)
+            .cookie("refreshToken", tokens.refreshToken, options)
+            .json({
+                msg: "Login successful!!",
+                user: safeUser
+            })
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+        res.status(500).json({ msg: "Internal Server Error" });
     }
-
-    const tokens = await userServices.generateAuthTokens(user)
-    const options = {
-        httpsOnly: true, // this prevents frontend from accessing cookie
-        secure: true // this makes sure ke cookie sirf secure env se transmit horhi hai
-    }
-
-    const { password: _, refreshToken: __, ...safeUser } = user;
-
-    res.status(200)
-        .cookie("accessToken", tokens.accessToken, options)
-        .cookie("refreshToken", tokens.refreshToken, options)
-        .json({
-            msg: "Login successful!!",
-            user: safeUser
-        })
 }
 
 const logout = async(req: /*LogoutRequest*/Request, res: Response) => {
@@ -126,7 +138,7 @@ const logout = async(req: /*LogoutRequest*/Request, res: Response) => {
     res.status(200)
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
-        .json({ msg: "User logged in successfully!!"})
+        .json({ msg: "User logged out successfully!!"})
 }
 
 export {

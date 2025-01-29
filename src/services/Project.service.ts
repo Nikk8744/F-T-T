@@ -1,4 +1,4 @@
-import { Insertable, NO_MIGRATIONS } from "kysely";
+import { Insertable, Updateable } from "kysely";
 import { DB } from "../utils/kysely-types";
 import { db } from "../config/db";
 
@@ -25,5 +25,34 @@ export const projectServices = {
         return result;
     },
 
-    async updateProject(id: number, updates: Partial<DB["projects"]>) {}
+    async updateProject(id: number, updates: Updateable<DB["projects"]>) {
+
+        const existingProject = await this.getProjectById(id);
+        if (!existingProject) {
+            throw new Error(`Project with id ${id} does not exist`);
+        }
+
+        await db.updateTable("projects")
+                .set(updates)
+                .where("id", "=", id)
+                .executeTakeFirstOrThrow();
+
+        return this.getProjectById(id);
+    },
+
+    async deleteProject(id: number) {
+
+        const existingProject = await this.getProjectById(id);
+        if (!existingProject) {
+            throw new Error(`Project with id ${id} does not exist`);
+        }
+
+        await db.deleteFrom("projects").where('id', '=', id).executeTakeFirstOrThrow();
+        return {msg: "Project deleted successfully"};
+    },
+
+    async getAllProjectsOfAUser (userId: number) {
+        const allProjectsOfUser =  db.selectFrom('projects').selectAll().where('userId', '=', userId).execute();
+        return allProjectsOfUser;
+    }
 }
