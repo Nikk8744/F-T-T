@@ -6,7 +6,7 @@ import { projectServices } from "./Project.service";
 export const taskServices = {
     async createTask (projectId: number,task: Omit<Insertable<DB['tasks']>, 'projectId' | 'assignedUserId'>, userId: number) {
         const isUserAMember = await db
-            .selectFrom("projectMembers")  
+            .selectFrom("projectmembers")  
             .where("projectId", "=", projectId)
             .where("userId", "=", userId)
             .select("projectId")

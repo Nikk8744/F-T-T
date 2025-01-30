@@ -30,13 +30,14 @@ import userRoutes from './routes/user.routes';
 import projectRoutes from './routes/project.routes';
 import projectMemberRoutes from './routes/projectMembers.routes';
 import taskRoutes from './routes/task.routes';
+import logRoutes from './routes/log.routes'
 
 // use routes
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/project', projectRoutes);
 app.use('/api/v1/projectMember', projectMemberRoutes);
 app.use('/api/v1/tasks', taskRoutes);
-
+app.use('/api/v1/logs', logRoutes);
 
 
 app.listen(process.env.PORT, () => {

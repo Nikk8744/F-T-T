@@ -12,11 +12,11 @@ export const projectMemberServices = {
             throw new Error("Forbidden: only the project owner can add members");
         }
 
-        const existingMember = await db.selectFrom("projectMembers").selectAll().where('projectId', '=', projectId).where('userId', '=', userIdToAdd).executeTakeFirst()
+        const existingMember = await db.selectFrom('projectmembers').selectAll().where('projectId', '=', projectId).where('userId', '=', userIdToAdd).executeTakeFirst()
         if (existingMember) {
             throw new Error(`User ${userIdToAdd} is already a member of project ${projectId}`);
         }
-        await db.insertInto("projectMembers").values({ projectId, userId: userIdToAdd }).executeTakeFirstOrThrow();
+        await db.insertInto("projectmembers").values({ projectId, userId: userIdToAdd }).executeTakeFirstOrThrow();
         return {msg: "Member added successfully", ownerId: ownerId.toString()};
     },
 
@@ -31,12 +31,12 @@ export const projectMemberServices = {
         //     throw new Error("Forbidden: only the project owner can add members");
         // }
 
-        const existingMember = await db.selectFrom("projectMembers").selectAll().where('projectId', '=', projectId).where('userId', '=', userId).executeTakeFirst()
+        const existingMember = await db.selectFrom("projectmembers").selectAll().where('projectId', '=', projectId).where('userId', '=', userId).executeTakeFirst()
         if (!existingMember) {
             throw new Error(`User ${userId} is not a member of project ${projectId}`);
         }
 
-        await db.deleteFrom("projectMembers").where('projectId', '=', projectId).where('userId', '=', userId).executeTakeFirstOrThrow();
+        await db.deleteFrom("projectmembers").where('projectId', '=', projectId).where('userId', '=', userId).executeTakeFirstOrThrow();
         return {msg: "User removed from project successfully"};
     },
 
@@ -51,13 +51,13 @@ export const projectMemberServices = {
         // }
 
         // now here we want to get all the members of projects i.e users, so we want to combine 2 tables users and projectmembers we need to perform inner join
-        return db.selectFrom("users").innerJoin("projectMembers", "projectMembers.userId", "users.id").select(["users.id", "users.name", "users.email"]).execute();
+        return db.selectFrom("users").innerJoin("projectmembers", "projectmembers.userId", "users.id").select(["users.id", "users.name", "users.email"]).execute();
     },
 
     async getAllProjectsAUserIsMemberOf (memberUserId: number){
         const result = await db.selectFrom("projects")
-                               .innerJoin("projectMembers", "projectMembers.projectId", "projects.id")
-                               .where("projectMembers.userId", "=", memberUserId)
+                               .innerJoin("projectmembers", "projectmembers.projectId", "projects.id")
+                               .where("projectmembers.userId", "=", memberUserId)
                                .selectAll("projects") // here i have written "projects" instead of * or blank to avoid the error or column conflicts
                                .execute();
         return result;

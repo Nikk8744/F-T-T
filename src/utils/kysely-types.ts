@@ -11,7 +11,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export interface ProjectMembers {
+export interface Projectmembers {
   projectId: number;
   userId: number;
 }
@@ -29,7 +29,7 @@ export interface Projects {
   userId: number;
 }
 
-export interface TaskChecklists {
+export interface Taskchecklists {
   createdAt: Generated<Date>;
   id: Generated<number>;
   isCompleted: Generated<number | null>;
@@ -51,15 +51,15 @@ export interface Tasks {
   updatedAt: Generated<Date>;
 }
 
-export interface TimeLogs {
+export interface Timelogs {
   createdAt: Generated<Date>;
   description: string | null;
   endTime: Date | null;
   id: Generated<number>;
   name: string | null;
-  projectId: number;
+  projectId: number | null;
   startTime: Date;
-  taskId: number;
+  taskId: number | null;
   timeSpent: Generated<number>;
   userId: number;
 }
@@ -76,10 +76,10 @@ export interface Users {
 }
 
 export interface DB {
-  projectMembers: ProjectMembers;
+  projectmembers: Projectmembers;
   projects: Projects;
-  taskChecklists: TaskChecklists;
+  taskchecklists: Taskchecklists;
   tasks: Tasks;
-  timeLogs: TimeLogs;
+  timelogs: Timelogs;
   users: Users;
 }
