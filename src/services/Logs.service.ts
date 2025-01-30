@@ -55,24 +55,28 @@ export const logServices = {
       const endTime = new Date();
       const timeSpent = Math.floor((endTime.getTime() - new Date(log.startTime).getTime()) / 1000);
 
-      const updateTimeLog = db.updateTable("timelogs").set({
+       db.updateTable("timelogs").set({
         ...data,
         endTime,
         timeSpent
       })
       .where('id', '=', logId)
-      .returningAll()
       .executeTakeFirstOrThrow();
 
       // also need to update the task total tiime field
       await db.updateTable("tasks").set({ totalTimeSpent: sql`totalTimeSpent + ${timeSpent}` }).where('id', '=', log.taskId).execute();
       // projects
-      await db
-      .updateTable('projects').set({
+      await db.updateTable('projects').set({
         totalHours: sql`totalHours + ${timeSpent / 3600}`
       }).where("id", "=", data.projectId)
       .execute();
 
-      return updateTimeLog;  
+      const updatedLog = await db
+      .selectFrom('timelogs')
+      .selectAll()
+      .where('id', '=', logId)
+      .executeTakeFirstOrThrow();
+
+      return updatedLog;
     },
 }
