@@ -11,7 +11,7 @@
  - Migrations allow you to avoid manually creating tables in a GUI tool like MySQL Workbench.
  - Running migrations ensures that your database schema is consistent and version-controlled.
 #### Tools for migration
-- knex migration (kysely doesnt have a built-in migration tool, so you would use knex)
+- knex migration ( or kysely built-in migration tool but its not that good, so you could use knex)
 - sequelize migration
 - typeorm migration
 - prisma migration

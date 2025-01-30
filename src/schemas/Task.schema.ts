@@ -11,5 +11,5 @@ export const TaskCreateSchema = z.object({
 });
 
 export const TaskUpdateSchema = TaskCreateSchema.partial().extend({
-  id: z.number().int().positive()
+  // id: z.number().int().positive()
 });
