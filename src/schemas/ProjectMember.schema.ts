@@ -6,3 +6,8 @@ export const addMemberSchema = z.object({
   userId: z.number().positive("User ID must be a positive number"),
   role: z.string().optional()  // optional field if you allow specifying a role
 });
+
+export const RemoveMemberSchema = z.object({
+  projectId: z.number().int().positive(),
+  userId: z.number().int().positive()
+});

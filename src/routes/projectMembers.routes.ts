@@ -1,9 +1,18 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
-import { addMemberToProject } from "../controllers/projectMember.controller";
+import { addMemberToProject, getAllMembersOfAProject, getAllProjectsAUserIsMemberOf, removeMember } from "../controllers/projectMember.controller";
+import { isProjectOwner } from "../middlewares/isOwner.middleware";
 
 const router = Router();
 
-router.route("/addMember").post(verifyJWT, addMemberToProject);
+router.use(verifyJWT)
+
+router.route("/addMember").post(isProjectOwner, addMemberToProject);
+
+router.route("/removeMember").delete(isProjectOwner, removeMember);
+
+router.route("/getAllMembers/:id").get(isProjectOwner, getAllMembersOfAProject);
+
+router.route("/getAllProjectsAUserIsMemberOf").get(getAllProjectsAUserIsMemberOf);
 
 export default router

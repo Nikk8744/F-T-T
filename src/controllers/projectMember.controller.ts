@@ -26,8 +26,64 @@ const addMemberToProject = async (req: Request, res: Response) => {
         }
         res.status(500).json({ msg: "Internal Server Error" });
     }
+};
+
+const removeMember = async (req: Request, res: Response): Promise<void> => {
+
+    const { projectId, userId } = req.body;
+    const ownerId = Number(req.user?.id)
+    if (!ownerId) {
+        res.status(401).json({ msg: 'Unauthorized' });
+    }
+
+    try {
+        const result = await projectMemberServices.removeMembersFromProject(projectId, userId);
+        if (!result) {
+            res.status(400).json({ msg: 'Failed to remove member from project' });
+        }
+    
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ msg: (error as Error).message });
+    }
+}
+
+const getAllMembersOfAProject = async (req: Request, res: Response) => {
+    const projectId = Number(req.params.id);
+    if(!projectId){
+        res.status(400).json({ msg: 'Invalid project id' });
+    }
+
+    const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, /*Number(req.user?.id)*/  );
+    if (!allMembers) {
+        res.status(400).json({ msg: 'Failed to get all members of project' });
+    }
+
+    res.status(200).json({
+        members: allMembers,
+        msg: 'All members of project retrieved successfully',
+    })
+};
+
+const getAllProjectsAUserIsMemberOf = async (req: Request, res: Response) => {
+    const userId = Number(req.user?.id)
+    if(!userId){
+        res.status(401).json({msg: "Unauthorized"})
+    }
+
+    const allProjects = await projectMemberServices.getAllProjectsAUserIsMemberOf(userId);
+    if (!allProjects || !allProjects.length) {
+        res.status(400).json({ msg: 'No projects found' });
+    }
+    res.status(200).json({
+        projects: allProjects,
+        msg: 'All projects a user is member of retrieved successfully',
+    })
 }
 
 export {
     addMemberToProject,
+    removeMember,
+    getAllMembersOfAProject,
+    getAllProjectsAUserIsMemberOf,
 }
