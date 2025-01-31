@@ -1,82 +1,137 @@
-
 import { sql, Updateable } from "kysely";
 import { db } from "../config/db";
 import { DB } from "../utils/kysely-types";
 
 interface StopTimeLogData {
-    projectId: number; // Required
-    taskId: number;    // Required
-    name?: string;
-    description?: string;
-  }
+  projectId: number; // Required
+  taskId: number; // Required
+  name?: string;
+  description?: string;
+}
 
 export const logServices = {
-    async startTimeLog (userId: number) {
+  async startTimeLog(userId: number) {
+    const startTime = new Date();
 
-        const startTime = new Date();
+    const activeLog = await db
+      .selectFrom("timelogs")
+      .select("id")
+      .where("userId", "=", userId)
+      .where("endTime", "is", null)
+      .executeTakeFirst();
 
-        const activeLog = await db
-        .selectFrom('timelogs')
-        .select('id')
-        .where('userId', '=', userId)
-        .where('endTime', 'is', null)
-        .executeTakeFirst();
+    if (activeLog) {
+      throw new Error("You have an active time log. Stop it first.");
+    }
 
-        if (activeLog) {
-            throw new Error('You have an active time log. Stop it first.');
-        }
+    const logEntry = await db
+      .insertInto("timelogs")
+      .values({
+        userId,
+        startTime: new Date(),
+        timeSpent: 0,
+        projectId: null, // Explicit null for nullable columns
+        taskId: null,
+      })
+      .executeTakeFirstOrThrow();
 
-        const logEntry =  await db.insertInto('timelogs').values({
-            userId,
-            startTime: new Date(),
-            timeSpent: 0,
-            projectId: null, // Explicit null for nullable columns
-            taskId: null 
-          })
-          .executeTakeFirstOrThrow();
-        
-          return db.selectFrom("timelogs").selectAll().where('id', '=', Number(logEntry.insertId)).executeTakeFirstOrThrow();
-          
-    },
+    return db
+      .selectFrom("timelogs")
+      .selectAll()
+      .where("id", "=", Number(logEntry.insertId))
+      .executeTakeFirstOrThrow();
+  },
 
-    async stopTimeLog (userId: number, logId: number, data: StopTimeLogData ) {
+  async stopTimeLog(userId: number, logId: number, data: StopTimeLogData) {
+    const log = await db
+      .selectFrom("timelogs")
+      .selectAll()
+      .where("id", "=", logId)
+      .where("userId", "=", userId)
+      .executeTakeFirstOrThrow();
 
-        const log = await db
-        .selectFrom('timelogs')
-        .selectAll()
-        .where('id', '=', logId)
-        .where('userId', '=', userId)
-        .executeTakeFirstOrThrow();
+    if (log.endTime) {
+      throw new Error("Time log already stopped");
+      // return new Error('Time log already stopped');
+    }
 
-      if (log.endTime) {
-        throw new Error('Time log already stopped');
-      }
+    const endTime = new Date();
+    const timeSpent = Math.floor(
+      (endTime.getTime() - new Date(log.startTime).getTime()) / 1000
+    );
 
-      const endTime = new Date();
-      const timeSpent = Math.floor((endTime.getTime() - new Date(log.startTime).getTime()) / 1000);
-
-       db.updateTable("timelogs").set({
+    // update the time logs
+    await db
+      .updateTable("timelogs")
+      .set({
         ...data,
         endTime,
-        timeSpent
+        timeSpent,
       })
-      .where('id', '=', logId)
+      .where("id", "=", logId)
       .executeTakeFirstOrThrow();
 
-      // also need to update the task total tiime field
-      await db.updateTable("tasks").set({ totalTimeSpent: sql`totalTimeSpent + ${timeSpent}` }).where('id', '=', log.taskId).execute();
-      // projects
-      await db.updateTable('projects').set({
-        totalHours: sql`totalHours + ${timeSpent / 3600}`
-      }).where("id", "=", data.projectId)
+    // also need to update the task table's total tiime field
+    await db
+      .updateTable("tasks")
+      .set({ totalTimeSpent: sql`totalTimeSpent + ${timeSpent}` })
+      .where("id", "=", data.taskId)
       .execute();
 
-      const updatedLog = await db
-      .selectFrom('timelogs')
+    // projects table ko bhi update krna padega
+    await db
+      .updateTable("projects")
+      .set({
+        totalHours: sql`totalHours + ${timeSpent / 3600}`,
+      })
+      .where("id", "=", data.projectId)
+      .execute();
+
+    const updatedLog = await db
+      .selectFrom("timelogs")
       .selectAll()
-      .where('id', '=', logId)
+      .where("id", "=", logId)
       .executeTakeFirstOrThrow();
 
-      return updatedLog;
-    },
-}
+    return updatedLog;
+  },
+
+  async getLogById(logId: number) {
+    const log = await db.selectFrom('timelogs').selectAll().where('id', '=', logId).executeTakeFirst();
+    return log;
+  },
+
+  async getUserLogs(userId: number) {
+    const userLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.userId', '=', userId).execute();
+    return userLogs;
+  },
+
+  async getProjectLogs(projectId: number) {
+    const projectLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.projectId', '=', projectId).execute();
+    return projectLogs;
+  },
+
+  async getTaskLogs(taskId: number) {
+    const taskLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.taskId', '=', taskId).execute();
+    return taskLogs;
+   },
+
+  async deleteLog(logId: number) {
+    
+    const log = await this.getLogById(logId);
+    if (!log) {
+      throw new Error('Log not found');
+    }
+
+    // deleted log from timelogs table
+    await db.deleteFrom('timelogs').where('id', '=', logId).execute();
+
+    // aab subtract krke updated krna task table and project table ko
+    if(log.timeSpent > 0){
+      await db.updateTable('tasks').set({totalTimeSpent: sql` totalTimeSpent - ${log.timeSpent}`}).where('id', '=', log.taskId).execute();
+
+      await db.updateTable('projects').set({totalHours: sql`totalHours - ${log.timeSpent / 3600}`}).where('id', '=', log.projectId).execute();
+    }
+    return true; 
+  },
+};
