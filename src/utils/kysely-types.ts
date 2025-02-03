@@ -32,7 +32,7 @@ export interface Projects {
 export interface Taskchecklists {
   createdAt: Generated<Date>;
   id: Generated<number>;
-  isCompleted: Generated<number | null>;
+  isCompleted: Generated<boolean | null>;
   item: string;
   taskId: number;
 }

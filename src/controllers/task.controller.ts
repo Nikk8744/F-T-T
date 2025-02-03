@@ -19,8 +19,12 @@ const createTask = async (req: Request, res: Response) => {
     } catch (error) {
         if (error instanceof ZodError) {
             res.status(400).json({ errors: error.errors });
-          }
-          res.status(500).json({ error: 'Task creation failed' });
+        }
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+        res.status(500).json({ error: 'Task creation failed' });
     }
 };
 
@@ -37,6 +41,10 @@ const getTask = async (req: Request, res: Response) => {
             task
         })
     } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
         res.status(500).json({ error: 'Failed to fetch task' });
     }
 }
@@ -54,6 +62,10 @@ const deleteTask = async (req: Request, res: Response) => {
         }
         res.status(200).json({ message: "Task deleted successfully" });
     } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
         res.status(500).json({ error: 'Task deletion failed' });
     }
 }

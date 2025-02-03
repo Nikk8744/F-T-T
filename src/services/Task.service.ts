@@ -12,7 +12,16 @@ export const taskServices = {
             .select("projectId")
             .executeTakeFirst()
         
-        if (!isUserAMember) {
+        
+        const isUserOwner = await db
+        .selectFrom("projects")
+        .where("id", "=", projectId)
+        .where("projects.userId", "=", userId)
+        .select("id")
+        .executeTakeFirst();
+
+
+        if (!isUserAMember && !isUserOwner) {
             throw new Error('User is not a project member');
         }
 

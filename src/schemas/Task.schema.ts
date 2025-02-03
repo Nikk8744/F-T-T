@@ -13,3 +13,17 @@ export const TaskCreateSchema = z.object({
 export const TaskUpdateSchema = TaskCreateSchema.partial().extend({
   // id: z.number().int().positive()
 });
+
+
+
+
+// task checklist validation schemas
+export const CreateChecklistItemSchema = z.object({
+  taskId: z.number().int().positive(),
+  item: z.string().min(1, "Item cannot be empty").max(255)
+});
+
+export const UpdateChecklistItemSchema = z.object({
+  item: z.string().min(1, "Item cannot be empty").max(255).optional(),
+  isCompleted: z.boolean().optional()
+});

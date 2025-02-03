@@ -9,6 +9,15 @@ interface StopTimeLogData {
   description?: string;
 }
 
+interface UpdateLogData {
+  name?: string;
+  description?: string;
+  taskId?: number;
+  projectId?: number;
+  startTime?: Date;
+  endTime?: Date;
+}
+
 export const logServices = {
   async startTimeLog(userId: number) {
     const startTime = new Date();
@@ -133,5 +142,80 @@ export const logServices = {
       await db.updateTable('projects').set({totalHours: sql`totalHours - ${log.timeSpent / 3600}`}).where('id', '=', log.projectId).execute();
     }
     return true; 
+  },
+
+  async updateLog(logId: number, userId: number, updates: UpdateLogData) {
+    const log = await this.getLogById(logId);
+    if (!log) {
+      throw new Error('Log not found');
+    }
+    const newStart = updates.startTime || log.startTime;
+    const newEnd = updates.endTime || (log.endTime ?? new Date());
+    const timeSpent = Math.floor((newEnd.getTime() - newStart.getTime()) / 1000);
+
+    const oldTaskId = log.taskId;
+    const oldProjectId = log.projectId;
+    const newTaskId = updates.taskId || log.taskId;
+    const newProjectId = updates.projectId || log.projectId;
+
+    await db
+    .updateTable('timelogs')
+    .set({
+      ...updates,
+      timeSpent
+    })
+    .where('id', '=', logId)
+    .execute();
+
+  // Handle task/project time updates
+    if (oldTaskId !== newTaskId || oldProjectId !== newProjectId) {
+      // Remove time from old task/project
+      if (oldTaskId) {
+        await db
+          .updateTable('tasks')
+          .set({totalTimeSpent:  sql`totalTimeSpent - ${log.timeSpent}`})
+          .where('id', '=', oldTaskId)
+          .execute();
+      }
+
+      if (oldProjectId) {
+        await db
+          .updateTable('projects')
+          .set({totalHours: sql`totalHours - ${log.timeSpent / 3600}`})
+          .where('id', '=', oldProjectId)
+          .execute();
+      }
+
+      // Add time to new task/project
+      await db
+        .updateTable('tasks')
+        .set({totalTimeSpent:sql`totalTimeSpent + ${timeSpent}`})
+        .where('id', '=', newTaskId)
+        .execute();
+
+      await db
+        .updateTable('projects')
+        .set({totalHours: sql`totalHours + ${timeSpent / 3600}`})
+        .where('id', '=', newProjectId)
+        .execute();
+    } else {
+      // Adjust time for same task/project
+      const timeDifference = timeSpent - log.timeSpent;
+
+      if (timeDifference !== 0) {
+        await db
+          .updateTable('tasks')
+          .set({totalTimeSpent: sql`totalTimeSpent + ${timeDifference}`})
+          .where('id', '=', newTaskId)
+          .execute();
+
+        await db
+          .updateTable('projects')
+          .set({totalHours: sql`totalHours + ${timeDifference / 3600}`})
+          .where('id', '=', newProjectId)
+          .execute();
+      }
+    }
+    return this.getLogById(logId)
   },
 };

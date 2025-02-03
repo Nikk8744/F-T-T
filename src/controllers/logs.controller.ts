@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { StartTimeLogSchema, StopTimeLogSchema } from "../schemas/Logs.schema";
+import { StartTimeLogSchema, StopTimeLogSchema, UpdateTimeLogSchema } from "../schemas/Logs.schema";
 import { logServices } from "../services/Logs.service";
 import { ZodError } from "zod";
 
@@ -52,7 +52,7 @@ const stopTimeLog = async (req: Request, res: Response) => {
         if (error instanceof ZodError) {
             res.status(400).json({ errors: error.errors });
           }
-          if (error instanceof Error) {
+        if (error instanceof Error) {
             res.status(400).json({ msg: error.message });
             return;
         }
@@ -185,6 +185,36 @@ const deleteLog = async (req: Request, res: Response) => {
     }
 };
 
+const updateTimeLog = async (req: Request, res: Response) => {
+
+    const userId = Number(req.user?.id);
+    const logId = Number(req.params.logId);
+
+    try {
+        const validatedData = UpdateTimeLogSchema.parse(req.body);
+        const updates = {
+            ...validatedData,
+            startTime: validatedData.startTime ? new Date(validatedData.startTime) : undefined,
+            endTime: validatedData.endTime ? new Date(validatedData.endTime) : undefined
+          };
+        const updatedLog = await logServices.updateLog(logId, userId, updates);
+    
+        res.status(200).json({
+            msg: "Log has been updated successfully",
+            data: updatedLog
+        })
+    } catch (error) {
+        if (error instanceof ZodError) {
+            res.status(400).json({ errors: error.errors });
+          }
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+          res.status(500).json({ error: 'Failed to update time log' })
+    }
+}
+
 export {
     startTimeLog,
     stopTimeLog,
@@ -193,4 +223,5 @@ export {
     getProjectLogs,
     getTaskLogs,
     deleteLog,
+    updateTimeLog,
 }
