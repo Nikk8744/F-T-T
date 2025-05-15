@@ -38,7 +38,10 @@ export const taskChecklistServices = {
         return { msg: "Checklist Item deelted successfully!!"}
     },
 
-    async updateChecklistItem (checklistItemId: number, userId: number, updates: Updateable<DB['taskchecklists']>) {
+    async updateChecklistItem (checklistItemId: number, userId: number, updates:{
+        item?: string;
+        isCompleted?: boolean;
+      }) {
         const checklistItem = await this.getChecklistItemById(checklistItemId);
         if(!checklistItem){
             throw new Error('Checklist item not found');
