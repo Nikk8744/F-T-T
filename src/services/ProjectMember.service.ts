@@ -13,6 +13,7 @@ export const projectMemberServices = {
         }
 
         const existingMember = await db.selectFrom('projectmembers').selectAll().where('projectId', '=', projectId).where('userId', '=', userIdToAdd).executeTakeFirst()
+        console.log({projectId, userIdToAdd})
         if (existingMember) {
             throw new Error(`User ${userIdToAdd} is already a member of project ${projectId}`);
         }
@@ -55,6 +56,8 @@ export const projectMemberServices = {
     },
 
     async getAllProjectsAUserIsMemberOf (memberUserId: number){
+        console.log("🚀 ~ getAllProjectsAUserIsMemberOf ~ memberUserId:", memberUserId)
+        
         const result = await db.selectFrom("projects")
                                .innerJoin("projectmembers", "projectmembers.projectId", "projects.id")
                                .where("projectmembers.userId", "=", memberUserId)

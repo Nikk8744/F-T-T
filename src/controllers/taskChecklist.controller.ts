@@ -56,8 +56,8 @@ const removeChecklistItem = async (req: Request, res: Response) => {
 
 const updateChecklistItem = async (req: Request, res: Response) => {
 
-  // NOTEEEE: the update will give error that it failed but the update will be done
-  // it will give error as mysql saves boolean as timyint so ill have to change the logic for that.
+  //! NOTEEEE: the update will give error that it failed but the update will be done
+  //! it will give error as mysql saves boolean as timyint so ill have to change the logic for that.
   try {
     const itemId = Number(req.params.itemId);
     const userId = Number(req.user?.id);

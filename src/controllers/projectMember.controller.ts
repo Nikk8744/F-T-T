@@ -34,12 +34,14 @@ const removeMember = async (req: Request, res: Response): Promise<void> => {
     const ownerId = Number(req.user?.id)
     if (!ownerId) {
         res.status(401).json({ msg: 'Unauthorized' });
+        return;
     }
 
     try {
         const result = await projectMemberServices.removeMembersFromProject(projectId, userId);
         if (!result) {
             res.status(400).json({ msg: 'Failed to remove member from project' });
+            return;
         }
     
         res.status(200).json(result);
@@ -52,11 +54,13 @@ const getAllMembersOfAProject = async (req: Request, res: Response) => {
     const projectId = Number(req.params.id);
     if(!projectId){
         res.status(400).json({ msg: 'Invalid project id' });
+        return;
     }
 
     const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, /*Number(req.user?.id)*/  );
     if (!allMembers) {
         res.status(400).json({ msg: 'Failed to get all members of project' });
+        return;
     }
 
     res.status(200).json({
@@ -65,15 +69,19 @@ const getAllMembersOfAProject = async (req: Request, res: Response) => {
     })
 };
 
+
 const getAllProjectsAUserIsMemberOf = async (req: Request, res: Response) => {
+    
     const userId = Number(req.user?.id)
     if(!userId){
-        res.status(401).json({msg: "Unauthorized"})
+        res.status(401).json({msg: "Unauthorized"});
+        return;
     }
-
+    
     const allProjects = await projectMemberServices.getAllProjectsAUserIsMemberOf(userId);
     if (!allProjects || !allProjects.length) {
         res.status(400).json({ msg: 'No projects found' });
+        return;
     }
     res.status(200).json({
         projects: allProjects,
