@@ -11,11 +11,12 @@ const startTimeLog = async (req: Request, res: Response) => {
     }
 
     try {
-        const validatedData = StartTimeLogSchema.parse(req.body);
+        // const validatedData = StartTimeLogSchema.parse(req.body);
     
         const startTimeLog = await logServices.startTimeLog(userId);
         if(!startTimeLog){
             res.status(400).json({ msg: "Error starting log" });
+            return;
         }
     
         res.status(200).json({
@@ -31,6 +32,7 @@ const startTimeLog = async (req: Request, res: Response) => {
 };
 
 const stopTimeLog = async (req: Request, res: Response) => {
+console.log("🚀 ~ stopTimeLog ~ req:", req.body)
 
     try {
         const userId = Number(req.user?.id)

@@ -50,23 +50,33 @@ const removeMember = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-const getAllMembersOfAProject = async (req: Request, res: Response) => {
-    const projectId = Number(req.params.id);
+const   getAllMembersOfAProject = async (req: Request, res: Response) => {
+    const projectId = Number(req.params.projectId);
     if(!projectId){
         res.status(400).json({ msg: 'Invalid project id' });
         return;
     }
 
-    const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, /*Number(req.user?.id)*/  );
-    if (!allMembers) {
-        res.status(400).json({ msg: 'Failed to get all members of project' });
+    try {
+        const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, Number(req.user?.id) );
+        console.log("🚀 ~ getAllMembersOfAProject ~ allMembers:", allMembers)
+        if (!allMembers) {
+            res.status(400).json({ msg: 'Failed to get all members of project' });
+            return;
+        }
+    
+        res.status(200).json({
+            members: allMembers,
+            msg: 'All members of project retrieved successfully',
+        })
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+        res.status(500).json({ msg: "Internal Server Error" });
         return;
     }
-
-    res.status(200).json({
-        members: allMembers,
-        msg: 'All members of project retrieved successfully',
-    })
 };
 
 

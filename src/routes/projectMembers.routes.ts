@@ -11,7 +11,7 @@ router.route("/addMember").post(isProjectOwner, addMemberToProject);
 
 router.route("/removeMember").delete(isProjectOwner, removeMember);
 
-router.route("/getAllMembers/:id").get(isProjectOwner, getAllMembersOfAProject);
+router.route("/getAllMembers/:projectId").get(isProjectOwner, getAllMembersOfAProject);
 
 router.route("/getAllProjectsAUserIsMemberOf").get(getAllProjectsAUserIsMemberOf);
 
