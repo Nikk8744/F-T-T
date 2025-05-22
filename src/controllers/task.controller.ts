@@ -4,21 +4,25 @@ import { taskServices } from "../services/Task.service";
 import { ZodError } from "zod";
 import { projectServices } from "../services/Project.service";
 
-const createTask = async (req: Request, res: Response) => {
-
+const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
         const projectId = Number(req.params.projectId)
-        const validateData = TaskCreateSchema.parse(req.body);
+        const data = req.body;
+        console.log("🚀 ~ createTask ~ data:", data)
+        const validateData = TaskCreateSchema.parse(data);
+        console.log("🚀 ~ createTask ~ validateData:", validateData)
         const userId = Number(req.user?.id);
     
         const task = await taskServices.createTask(projectId, validateData, userId);
         res.status(200).json({
             message: "Task created successfully",
             task,
-        })
+        });
     } catch (error) {
+        console.log("🚀 ~ createTask ~ error:", error)
         if (error instanceof ZodError) {
             res.status(400).json({ errors: error.errors });
+            return;
         }
         if (error instanceof Error) {
             res.status(400).json({ msg: error.message });

@@ -42,7 +42,9 @@ export const taskChecklistServices = {
         item?: string;
         isCompleted?: boolean;
       }) {
+        console.log("🚀 ~ updates:", updates)
         const checklistItem = await this.getChecklistItemById(checklistItemId);
+        console.log("🚀 ~ checklistItem:", checklistItem)
         if(!checklistItem){
             throw new Error('Checklist item not found');
         }
@@ -57,13 +59,24 @@ export const taskChecklistServices = {
             throw new Error('Only task owner can update checklist items');
         }
 
-        const result = await db
-        .updateTable('taskchecklists')
-        .set(updates)
-        .where('id', '=', checklistItemId)
-        .executeTakeFirstOrThrow();
+        // Handle the update with proper types
+        const updateData: { item?: string; isCompleted?: boolean } = {};
+        if (updates.item !== undefined) {
+            updateData.item = updates.item;
+        }
+        if (updates.isCompleted !== undefined) {
+            updateData.isCompleted = updates.isCompleted;
+        }
 
-        return result;
+        await db
+        .updateTable('taskchecklists')
+        .set(updateData)
+        .where('id', '=', checklistItemId)
+        .executeTakeFirstOrThrow()
+
+        // Fetch and return the updated item
+        const updatedItem = await this.getChecklistItemById(checklistItemId);
+        return updatedItem;
     },
 
     async getTaskChecklist(taskId: number) {

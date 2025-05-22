@@ -65,17 +65,26 @@ const updateChecklistItem = async (req: Request, res: Response) => {
     const validatedData = UpdateChecklistItemSchema.parse(req.body);
     const updatedItem = await taskChecklistServices.updateChecklistItem(itemId, userId, validatedData);
   
-    res.status(200).json({
+    if (!updatedItem) {
+      res.status(404).json({ message: "Checklist item not found" });
+    }
+
+     res.status(200).json({
       message: "Checklist item updated successfully",
       item: updatedItem
-    })
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ errors: error.errors });
+      return;
     }
-    res.status(500).json({ error: 'Failed to update checklist item' });
+    if (error instanceof Error) {
+       res.status(400).json({ message: error.message });
+       return;
+    }
+    res.status(500).json({ message: 'Failed to update checklist item' });
+    return;
   }
-
 };
 
 const getTaskChecklist = async (req: Request, res: Response) => {

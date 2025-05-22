@@ -15,8 +15,6 @@ export const TaskUpdateSchema = TaskCreateSchema.partial().extend({
 });
 
 
-
-
 // task checklist validation schemas
 export const CreateChecklistItemSchema = z.object({
   taskId: z.number().int().positive(),
