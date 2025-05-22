@@ -8,18 +8,19 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
         const projectId = Number(req.params.projectId)
         const data = req.body;
-        console.log("🚀 ~ createTask ~ data:", data)
         const validateData = TaskCreateSchema.parse(data);
-        console.log("🚀 ~ createTask ~ validateData:", validateData)
         const userId = Number(req.user?.id);
     
         const task = await taskServices.createTask(projectId, validateData, userId);
+        if(!task){
+            res.status(404).json({ message: "Task not created" });
+            return;
+        }
         res.status(200).json({
             message: "Task created successfully",
             task,
         });
     } catch (error) {
-        console.log("🚀 ~ createTask ~ error:", error)
         if (error instanceof ZodError) {
             res.status(400).json({ errors: error.errors });
             return;
