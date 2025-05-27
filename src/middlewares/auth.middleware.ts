@@ -26,21 +26,23 @@ interface AuthenticationRequest extends Request {
 export const verifyJWT = async (req: AuthenticationRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-        if (!token) /*return*/ res.status(401).json({ message: "Unauthorized requesttt" });
+        if (!token) {
+            res.status(401).json({ message: "Unauthorized request" });
+            return;
+        }
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || "hhello") as decodedToken
     
         const user = await userServices.getUserById(decodedToken.id);
         if (!user) {
-            // return 
             res.status(401).json({ msg: "Invalid Access token" });
+            return;
         }
         req.user = user;
-        // const authenticationRequest = { ...req, user }
         next();
     } catch (error) {
-        // return 
-        res.status(500).json({msg: "Something went wrong while verifying access token"})
+        res.status(500).json({msg: "Something went wrong while verifying access token"});
+        return;
     }
 }
 

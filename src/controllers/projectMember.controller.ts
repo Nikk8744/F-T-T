@@ -59,7 +59,7 @@ const   getAllMembersOfAProject = async (req: Request, res: Response) => {
 
     try {
         const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, Number(req.user?.id) );
-        console.log("🚀 ~ getAllMembersOfAProject ~ allMembers:", allMembers)
+        // console.log("🚀 ~ getAllMembersOfAProject ~ allMembers:", allMembers)
         if (!allMembers) {
             res.status(400).json({ msg: 'Failed to get all members of project' });
             return;
