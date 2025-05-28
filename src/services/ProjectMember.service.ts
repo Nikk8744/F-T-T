@@ -2,12 +2,12 @@ import { db } from "../config/db"
 
 export const projectMemberServices = {
     async addMembersToProject(projectId: number, currentUser: number, userIdToAdd: number) {
-        const project = await db.selectFrom("projects").select(["id", "userId"]).where('id', '=', projectId).executeTakeFirst();
+        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
         if (!project) {
             throw new Error("Project not found");
         }
 
-        const ownerId = project.userId ? Number(project.userId) : undefined;
+        const ownerId = project.ownerId ? Number(project.ownerId) : undefined;
         if (ownerId !== currentUser) {
             throw new Error("Forbidden: only the project owner can add members");
         }
@@ -22,7 +22,7 @@ export const projectMemberServices = {
     },
 
     async removeMembersFromProject(projectId: number,/*currentUser: number,*/ userId: number) {
-        const project = await db.selectFrom("projects").select(["id", "userId"]).where('id', '=', projectId).executeTakeFirst();
+        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
         if (!project) {
             throw new Error("Project not found");
         }
@@ -42,12 +42,12 @@ export const projectMemberServices = {
     },
 
     async getAllMembersOfAProject(projectId: number, currentUser: number) {
-        const project = await db.selectFrom("projects").select(["id", "userId"]).where('id', '=', projectId).executeTakeFirst();
+        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
         console.log("🚀 ~ getAllMembersOfAProject ~ project:", project)
         if (!project) {
             throw new Error("Project not found");
         }
-        const ownerId = project.userId ? Number(project.userId) : undefined;
+        const ownerId = project.ownerId ? Number(project.ownerId) : undefined;
         if (ownerId !== currentUser) {
             throw new Error("Forbidden: only the project owner can add members");
         }

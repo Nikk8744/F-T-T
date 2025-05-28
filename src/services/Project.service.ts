@@ -52,7 +52,7 @@ export const projectServices = {
     },
 
     async getAllProjectsOfAUser (userId: number) {
-        const allProjectsOfUser =  db.selectFrom('projects').selectAll().where('userId', '=', userId).execute();
+        const allProjectsOfUser =  db.selectFrom('projects').selectAll().where('ownerId', '=', userId).execute();
         return allProjectsOfUser;
     }
 }

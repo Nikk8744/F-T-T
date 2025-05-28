@@ -26,7 +26,7 @@ export interface Projects {
   status: Generated<string | null>;
   totalHours: Generated<Decimal | null>;
   updatedAt: Generated<Date>;
-  userId: number;
+  ownerId: number;
 }
 
 export interface Taskchecklists {

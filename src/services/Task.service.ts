@@ -16,7 +16,7 @@ export const taskServices = {
         const isUserOwner = await db
         .selectFrom("projects")
         .where("id", "=", projectId)
-        .where("projects.userId", "=", userId)
+        .where("projects.ownerId", "=", userId)
         .select("id")
         .executeTakeFirst();
 

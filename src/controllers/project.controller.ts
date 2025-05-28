@@ -14,22 +14,21 @@ import { ZodError } from "zod";
 const createProject = async (req: /*ICreateProject*/Request, res: Response): Promise<void> => {
     const validatedProject = createProjectSchema.parse(req.body);
     const userId = Number(req.user?.id);
-    
-    
+
+
     if (!userId) {
         res.status(401).json({ msg: "Unauthorized, please login first." });
         return;
     }
     // Validate and parse the request body with your schema
     const startDate = new Date(validatedProject.startDate);  // Convert to Date
-    const endDate = new Date(validatedProject.endDate); 
+    const endDate = new Date(validatedProject.endDate);
     const projectData = {
-        ...validatedProject, 
-        userId,
+        ...validatedProject,
+        ownerId: userId,
         startDate,
         endDate,
         description: validatedProject.description || "",
-
     };
     const project = await projectServices.createProject(projectData);
     res.status(200).json({
@@ -46,7 +45,7 @@ const getProjectById = async (req: Request, res: Response) => {
     const project = await projectServices.getProjectById(projectId);
 
     if (!project) {
-        res.status(404).json({msg: "Project not found!!"})
+        res.status(404).json({ msg: "Project not found!!" })
     }
 
     res.status(200).json({
@@ -68,29 +67,29 @@ const updateProject = async (req: Request, res: Response) => {
             res.status(404).json({ msg: "Project not found!" });
             return;
         }
-    
+
         const userId = Number(req.user?.id);
         const userRole = req.user?.role;
-    
+
         // Check if the user is the owner or has Admin role
-        if (project.userId !== userId && userRole !== "Admin") {
+        if (project.ownerId !== userId && userRole !== "Admin") {
             res.status(403).json({ msg: "Forbidden: You cannot update this project." });
             return;
         }
-    
-        const validatedProject = updateProjectSchema.parse({...req.body, id: projectId});
-    
+
+        const validatedProject = updateProjectSchema.parse({ ...req.body, id: projectId });
+
         const updatedData = {
             ...validatedProject,
             totalHours: validatedProject.totalHours !== undefined
-                    ? validatedProject.totalHours.toString()
-                    : undefined,
+                ? validatedProject.totalHours.toString()
+                : undefined,
         }
         const updatedProject = await projectServices.updateProject(projectId, updatedData);
         if (!updatedProject) {
-            res.status(404).json({msg:"User not found!!"})
+            res.status(404).json({ msg: "User not found!!" })
         }
-    
+
         res.status(200).json({
             msg: "Project updated successfully!!",
             project: updatedProject,
@@ -122,21 +121,21 @@ const deleteProject = async (req: Request, res: Response) => {
             res.status(401).json({ msg: "Unauthorized, please login first." });
             return;
         }
-    
+
         const project = await projectServices.getProjectById(projectId);
         if (!project) {
             res.status(404).json({ msg: "Project not found!" });
             return;
         }
-    
+
         // Check if the user is the owner or has Admin role
-        if (project.userId !== userId && userRole !== "Admin") {
+        if (project.ownerId !== userId && userRole !== "Admin") {
             res.status(403).json({ msg: "Forbidden: You cannot delete this project." });
             return;
         }
-    
+
         const deletedProject = await projectServices.deleteProject(projectId);
-    
+
         res.status(200).json({
             msg: deletedProject.msg,
         })
@@ -159,10 +158,10 @@ const getAllProjectsOfAUser = async (req: Request, res: Response): Promise<void>
     try {
         const allProjects = await projectServices.getAllProjectsOfAUser(userId);
         if (!allProjects || allProjects.length === 0) {
-            res.status(400).json({msg: "No projects found!!"});
+            res.status(400).json({ msg: "No projects found!!" });
             return;
         }
-    
+
         res.status(200).json({
             msg: "All projects fetched successfully",
             projects: allProjects
@@ -172,7 +171,7 @@ const getAllProjectsOfAUser = async (req: Request, res: Response): Promise<void>
             res.status(400).json({ msg: error.message });
             return;
         }
-        res.status(500).json({ msg: "Internal Server Error",  error });
+        res.status(500).json({ msg: "Internal Server Error", error });
     }
 }
 

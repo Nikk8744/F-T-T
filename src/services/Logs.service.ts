@@ -218,4 +218,34 @@ export const logServices = {
     }
     return this.getLogById(logId)
   },
+
+  async getTotalTimeSpentToday(userId: number) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const result = await db
+      .selectFrom('timelogs')
+      .select(({ fn }) => [
+        fn.sum('timeSpent').as('totalTimeSpent')
+      ])
+      .where('userId', '=', userId)
+      .where('startTime', '>=', today)
+      .where('startTime', '<', tomorrow)
+      .executeTakeFirst();
+
+    return {
+      totalTimeSpent: Number(result?.totalTimeSpent || 0),
+      formattedTime: this.formatTimeSpent(Number(result?.totalTimeSpent || 0))
+    };
+  },
+
+  formatTimeSpent(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  }
 };

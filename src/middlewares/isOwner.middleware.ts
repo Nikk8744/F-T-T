@@ -22,7 +22,7 @@ export const isProjectOwner = async (req: Request, res: Response, next: NextFunc
             return;
         }
     
-        if(project?.userId !== incomingUserId) {
+        if(project?.ownerId !== incomingUserId) {
             res.status(403).json({ msg: "Forbidden: Only the project owner can perform this action" });
             return;
         }

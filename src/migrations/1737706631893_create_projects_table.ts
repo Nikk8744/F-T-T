@@ -9,7 +9,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 			.addColumn('startDate', 'datetime', col => col.notNull())
 			.addColumn('endDate', 'datetime', col => col.notNull())
 			.addColumn('status', 'varchar(20)', col => col.defaultTo('Pending').check(sql`status IN('Pending', 'In-Progress', 'Completed')`))
-			.addColumn('userId', 'integer', col => col.notNull())
+			.addColumn('ownerId', 'integer', col => col.notNull())
 			.addColumn('totalHours', 'decimal', col => col.defaultTo(0))
 			.addColumn('createdAt', 'timestamp', col => 
 				col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
@@ -25,7 +25,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 			// relationship rule between projects table and users. so that if a user gets deleted, automatically delete all their projects too!
 			.addForeignKeyConstraint(
 				'projects_user_fk',
-				['userId'], 
+				['ownerId'], 
 				'users',
 				['id'],
 				(cb) => cb.onDelete('cascade')

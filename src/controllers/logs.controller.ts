@@ -217,6 +217,29 @@ const updateTimeLog = async (req: Request, res: Response) => {
     }
 }
 
+const getTotalTimeSpentToday = async (req: Request, res: Response) => {
+    // console.log("Calleddddddd")
+    try {
+        const userId = Number(req.user?.id);
+        if (isNaN(userId) || userId <= 0) {
+            res.status(400).json({ msg: "Invalid user id" });
+            return;
+        }
+
+        const timeSpent = await logServices.getTotalTimeSpentToday(userId);
+        res.status(200).json({
+            msg: "Total time spent today retrieved successfully",
+            data: timeSpent
+        });
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+        res.status(500).json({ error: 'Failed to get total time spent today' });
+    }
+};
+
 export {
     startTimeLog,
     stopTimeLog,
@@ -226,4 +249,5 @@ export {
     getTaskLogs,
     deleteLog,
     updateTimeLog,
+    getTotalTimeSpentToday
 }
