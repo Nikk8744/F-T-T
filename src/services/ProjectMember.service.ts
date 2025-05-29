@@ -47,9 +47,21 @@ export const projectMemberServices = {
         if (!project) {
             throw new Error("Project not found");
         }
-        const ownerId = project.ownerId ? Number(project.ownerId) : undefined;
-        if (ownerId !== currentUser) {
-            throw new Error("Forbidden: only the project owner can add members");
+
+        // Check if user is either the owner or a member
+        const isOwner = project.ownerId === currentUser;
+        if (!isOwner) {
+            // If not owner, check if user is a member
+            const isMember = await db
+                .selectFrom("projectmembers")
+                .select("userId")
+                .where("projectId", "=", projectId)
+                .where("userId", "=", currentUser)
+                .executeTakeFirst();
+
+            if (!isMember) {
+                throw new Error("Forbidden: You must be a project member to view team members");
+            }
         }
 
         // now here we want to get all the members of projects i.e users, so we want to combine 2 tables users and projectmembers we need to perform inner join

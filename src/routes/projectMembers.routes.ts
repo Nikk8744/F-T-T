@@ -11,8 +11,10 @@ router.route("/addMember").post(isProjectOwner, addMemberToProject);
 
 router.route("/removeMember").delete(isProjectOwner, removeMember);
 
-router.route("/getAllMembers/:projectId").get(isProjectOwner, getAllMembersOfAProject);
+// router.route("/getAllMembers/:projectId").get(isProjectOwner, getAllMembersOfAProject);
+// ! no need to add the isProjectOwner middleware check here as we need all the project members to see the members list.
+router.route("/getAllMembers/:projectId").get( getAllMembersOfAProject); 
 
 router.route("/getAllProjectsAUserIsMemberOf").get(getAllProjectsAUserIsMemberOf);
 
-export default router
+export default router   
