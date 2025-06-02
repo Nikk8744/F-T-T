@@ -22,11 +22,16 @@ export interface Projects {
   endDate: Date;
   id: Generated<number>;
   name: string;
+  ownerId: number;
   startDate: Date;
   status: Generated<string | null>;
   totalHours: Generated<Decimal | null>;
   updatedAt: Generated<Date>;
-  ownerId: number;
+}
+
+export interface TaskAssignments {
+  taskId: number;
+  userId: number;
 }
 
 export interface Taskchecklists {
@@ -38,11 +43,11 @@ export interface Taskchecklists {
 }
 
 export interface Tasks {
-  assignedUserId: number;
   createdAt: Generated<Date>;
   description: string | null;
   dueDate: Date | null;
   id: Generated<number>;
+  ownerId: number;
   projectId: number;
   startDate: Generated<Date>;
   status: Generated<string | null>;
@@ -78,6 +83,7 @@ export interface Users {
 export interface DB {
   projectmembers: Projectmembers;
   projects: Projects;
+  task_assignments: TaskAssignments;
   taskchecklists: Taskchecklists;
   tasks: Tasks;
   timelogs: Timelogs;

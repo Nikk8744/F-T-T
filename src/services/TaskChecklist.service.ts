@@ -7,11 +7,11 @@ export const taskChecklistServices = {
 
         const task = await db
         .selectFrom('tasks')
-        .select('assignedUserId')
+        .select('ownerId')
         .where('id', '=', taskId)
         .executeTakeFirstOrThrow();
 
-        if (task.assignedUserId !== userId) {
+        if (task.ownerId !== userId) {
         throw new Error('Only task owner can add checklist items');
         }
 
@@ -42,20 +42,18 @@ export const taskChecklistServices = {
         item?: string;
         isCompleted?: boolean;
       }) {
-        console.log("🚀 ~ updates:", updates)
         const checklistItem = await this.getChecklistItemById(checklistItemId);
-        console.log("🚀 ~ checklistItem:", checklistItem)
         if(!checklistItem){
             throw new Error('Checklist item not found');
         }
 
         const task = await db
         .selectFrom('tasks')
-        .select('assignedUserId')
+        .select('ownerId')
         .where('id', '=', checklistItem.taskId)
         .executeTakeFirstOrThrow();
 
-        if (task.assignedUserId !== userId) {
+        if (task.ownerId !== userId) {
             throw new Error('Only task owner can update checklist items');
         }
 

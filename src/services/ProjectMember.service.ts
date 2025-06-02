@@ -43,7 +43,6 @@ export const projectMemberServices = {
 
     async getAllMembersOfAProject(projectId: number, currentUser: number) {
         const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
-        console.log("🚀 ~ getAllMembersOfAProject ~ project:", project)
         if (!project) {
             throw new Error("Project not found");
         }
@@ -73,7 +72,7 @@ export const projectMemberServices = {
     },
 
     async getAllProjectsAUserIsMemberOf(memberUserId: number) {
-        console.log("🚀 ~ getAllProjectsAUserIsMemberOf ~ memberUserId:", memberUserId)
+        // console.log("🚀 ~ getAllProjectsAUserIsMemberOf ~ memberUserId:", memberUserId)
 
         const result = await db.selectFrom("projects")
             .innerJoin("projectmembers", "projectmembers.projectId", "projects.id")

@@ -14,7 +14,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .addColumn('dueDate', 'datetime')
     .addColumn('totalTimeSpent', 'integer', col => col.defaultTo(0))
-	.addColumn('assignedUserId', 'integer', col => col.notNull())
+	.addColumn('ownerId', 'integer', col => col.notNull())
 	.addColumn('projectId', 'integer', col => col.notNull())
     .addColumn('createdAt', 'timestamp', col => 
       col.defaultTo(sql`CURRENT_TIMESTAMP`).notNull()
@@ -26,8 +26,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     // Relationships
     .addForeignKeyConstraint(
-      'tasks_assigned_user_fk',
-      ['assignedUserId'],
+      'tasks_owner_fk',
+      ['ownerId'],
       'users',
       ['id'],
       (cb) => cb.onDelete('cascade')

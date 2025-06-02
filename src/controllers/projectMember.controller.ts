@@ -51,7 +51,6 @@ const removeMember = async (req: Request, res: Response): Promise<void> => {
 }
 
 const getAllMembersOfAProject = async (req: Request, res: Response) => {
-    console.log("HJjfdhgbsifhfsgkjsghgsf")
     const projectId = Number(req.params.projectId);
     if(!projectId){
         res.status(400).json({ msg: 'Invalid project id' });

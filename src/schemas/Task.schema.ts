@@ -7,7 +7,7 @@ export const TaskCreateSchema = z.object({
   // startDate: z.string(),
   dueDate: z.string().datetime().transform((val) => new Date(val)).optional(),
   // projectId: z.number().int().positive(),
-  assignedUserId: z.number().int().positive().optional(),
+  ownerId: z.number().int().positive().optional(),
 });
 
 export const TaskUpdateSchema = TaskCreateSchema.partial().extend({
