@@ -11,6 +11,25 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export interface Notifications {
+  id: Generated<number>;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  entityType: string;
+  entityId: number;
+  initiatorId: number | null;
+  isRead: Generated<boolean>;
+  createdAt: Generated<Date>;
+}
+
+export interface NotificationPreferences {
+  userId: number;
+  type: string;
+  enabled: Generated<boolean>;
+}
+
 export interface Projectmembers {
   projectId: number;
   userId: number;
@@ -30,6 +49,11 @@ export interface Projects {
 }
 
 export interface TaskAssignments {
+  taskId: number;
+  userId: number;
+}
+
+export interface TaskFollowers {
   taskId: number;
   userId: number;
 }
@@ -81,6 +105,8 @@ export interface Users {
 }
 
 export interface DB {
+  notifications: Notifications;
+  notification_preferences: NotificationPreferences;
   projectmembers: Projectmembers;
   projects: Projects;
   task_assignments: TaskAssignments;
