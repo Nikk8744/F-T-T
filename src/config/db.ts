@@ -5,11 +5,11 @@ import { DB } from "../utils/kysely-types";
 
 export const dialect = new MysqlDialect({
     pool: createPool({
-        host : 'localhost',
-        user : 'root',
-        password : 'Wellcome@123',
-        database : 'freelance_time_tracker',
-        port: 3306,
+        host : process.env.DATABASE_HOST,
+        user : process.env.DATABASE_USER,
+        password : process.env.DATABASE_PASSOWRD,
+        database : process.env.DATABASE_NAME,
+        port: parseInt(process.env.DATABASE_PORT || '3306'),
         connectionLimit: 10,
     }),
   });

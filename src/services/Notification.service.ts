@@ -167,54 +167,54 @@ export const notificationService = {
       .execute();
   },
   
-  // Get user's notification preferences
-  async getUserNotificationPreferences(userId: number): Promise<any[]> {
-    return db
-      .selectFrom('notification_preferences')
-      .selectAll()
-      .where('userId', '=', userId)
-      .execute();
-  },
+  // // Get user's notification preferences
+  // async getUserNotificationPreferences(userId: number): Promise<any[]> {
+  //   return db
+  //     .selectFrom('notification_preferences')
+  //     .selectAll()
+  //     .where('userId', '=', userId)
+  //     .execute();
+  // },
   
-  // Update user's notification preference
-  async updateNotificationPreference(userId: number, type: NotificationType, enabled: boolean): Promise<void> {
-    // Check if preference exists
-    const preference = await db
-      .selectFrom('notification_preferences')
-      .select(['userId'])
-      .where('userId', '=', userId)
-      .where('type', '=', type)
-      .executeTakeFirst();
+  // // Update user's notification preference
+  // async updateNotificationPreference(userId: number, type: NotificationType, enabled: boolean): Promise<void> {
+  //   // Check if preference exists
+  //   const preference = await db
+  //     .selectFrom('notification_preferences')
+  //     .select(['userId'])
+  //     .where('userId', '=', userId)
+  //     .where('type', '=', type)
+  //     .executeTakeFirst();
     
-    if (preference) {
-      // Update existing preference
-      await db
-        .updateTable('notification_preferences')
-        .set({ enabled })
-        .where('userId', '=', userId)
-        .where('type', '=', type)
-        .execute();
-    } else {
-      // Create new preference
-      await db
-        .insertInto('notification_preferences')
-        .values({
-          userId,
-          type,
-          enabled
-        })
-        .execute();
-    }
-  },
+  //   if (preference) {
+  //     // Update existing preference
+  //     await db
+  //       .updateTable('notification_preferences')
+  //       .set({ enabled })
+  //       .where('userId', '=', userId)
+  //       .where('type', '=', type)
+  //       .execute();
+  //   } else {
+  //     // Create new preference
+  //     await db
+  //       .insertInto('notification_preferences')
+  //       .values({
+  //         userId,
+  //         type,
+  //         enabled
+  //       })
+  //       .execute();
+  //   }
+  // },
   
   // Initialize default notification preferences for a user
-  async initializeUserNotificationPreferences(userId: number): Promise<void> {
-    const notificationTypes = Object.values(NotificationType);
+  // async initializeUserNotificationPreferences(userId: number): Promise<void> {
+  //   const notificationTypes = Object.values(NotificationType);
     
-    for (const type of notificationTypes) {
-      await this.updateNotificationPreference(userId, type, true);
-    }
-  },
+  //   for (const type of notificationTypes) {
+  //     await this.updateNotificationPreference(userId, type, true);
+  //   }
+  // },
   
   // Create task-related notifications
   async notifyTaskCreated(taskId: number, task: any, initiatorId: number): Promise<void> {
