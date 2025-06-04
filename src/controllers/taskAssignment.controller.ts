@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { taskAssignmentServices } from "../services/TaskAssignment.service";
 import { z } from "zod";
+import { notificationService } from "../services/Notification.service";
+import { taskServices } from "../services/Task.service";
 
 // Schema for validating taskId and userId parameters
 const TaskUserParamsSchema = z.object({
@@ -30,6 +32,14 @@ export const assignUserToTask = async (req: Request, res: Response) => {
       Number(userId)
     );
 
+    // Get task details for notification
+    const task = await taskServices.getTaskById(Number(taskId));
+    if (task) {
+      // Send notification to the assignee
+      const initiatorId = Number(req.user?.id);
+      await notificationService.notifyTaskAssigned(Number(taskId), task, Number(userId), initiatorId);
+    }
+
     res.status(200).json({
       msg: "User assigned to task successfully",
       data: result
@@ -54,10 +64,31 @@ export const unassignUserFromTask = async (req: Request, res: Response) => {
       userId: req.params.userId
     });
 
+    // Get task details before unassigning
+    const task = await taskServices.getTaskById(Number(taskId));
+    
     await taskAssignmentServices.unassignUserFromTask(
       Number(taskId),
       Number(userId)
     );
+
+    // Optional: Add notification for user being unassigned
+    // This is commented out because it might be considered noise for users
+    // Uncomment if you want users to be notified when they're unassigned
+    /*
+    if (task) {
+      const initiatorId = Number(req.user?.id);
+      await notificationService.createNotification({
+        userId: Number(userId),
+        type: notificationService.NotificationType.TASK_UPDATED,
+        title: 'Removed from Task',
+        message: `You have been unassigned from the task "${task.subject}".`,
+        entityType: notificationService.EntityType.TASK,
+        entityId: Number(taskId),
+        initiatorId
+      });
+    }
+    */
 
     res.status(200).json({
       msg: "User unassigned from task successfully"
@@ -86,9 +117,19 @@ export const bulkAssignUsersToTask = async (req: Request, res: Response) => {
     const { userIds } = UserIdsSchema.parse(req.body);
     
     const results = [];
+    
+    // Get task details for notification
+    const task = await taskServices.getTaskById(taskId);
+    const initiatorId = Number(req.user?.id);
+    
     for (const userId of userIds) {
       const result = await taskAssignmentServices.assignTaskToUser(taskId, userId);
       results.push(result);
+      
+      // Send notification to each assignee
+      if (task) {
+        await notificationService.notifyTaskAssigned(taskId, task, userId, initiatorId);
+      }
     }
 
     res.status(200).json({

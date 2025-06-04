@@ -21,26 +21,25 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         
-        // // Assign users to the task if assigneeIds are provided in the request body
-        // const assigneeIds = req.body.assigneeIds;
-        // if (assigneeIds && Array.isArray(assigneeIds) && assigneeIds.length > 0) {
-        //     for (const assigneeId of assigneeIds) {
-        //         await taskAssignmentServices.assignTaskToUser(task.id, assigneeId);
-        //         // Send notification to the assignee
-        //         await notificationService.notifyTaskAssigned(task.id, task, assigneeId, userId);
-        //     }
-        // }
+        // Assign users to the task if assigneeIds are provided in the request body
+        const assigneeIds = req.body.assigneeIds;
+        if (assigneeIds && Array.isArray(assigneeIds) && assigneeIds.length > 0) {
+            for (const assigneeId of assigneeIds) {
+                await taskAssignmentServices.assignTaskToUser(task.id, assigneeId);
+                // Send notification to the assignee
+                await notificationService.notifyTaskAssigned(task.id, task, assigneeId, userId);
+            }
+        }
         
-        // // Send notifications
-        // await notificationService.notifyTaskCreated(task.id, task, userId);
+        // Send notifications
+        await notificationService.notifyTaskCreated(task.id, task, userId);
         
-        // // Get the task with all its details
-        // const taskWithDetails = await taskServices.getTaskById(task.id);
+        // Get the task with all its details
+        const taskWithDetails = await taskServices.getTaskById(task.id); 
         
         res.status(200).json({
             message: "Task created successfully",
-            // task: taskWithDetails,
-            task: task
+            task: taskWithDetails
         });
     } catch (error) {
         if (error instanceof ZodError) {
@@ -124,47 +123,47 @@ const updateTask = async (req: Request, res: Response) => {
             return;
         }
         
-        // // Handle assignees if specified in request body
-        // const assigneeIds = req.body.assigneeIds;
-        // if (assigneeIds && Array.isArray(assigneeIds)) {
-        //     // Get current assignees
-        //     const previousAssignees = await taskAssignmentServices.getTaskAssignees(taskId);
-        //     const previousAssigneeIds = previousAssignees.map(a => a.id);
+        // Handle assignees if specified in request body
+        const assigneeIds = req.body.assigneeIds;
+        if (assigneeIds && Array.isArray(assigneeIds)) {
+            // Get current assignees
+            const previousAssignees = await taskAssignmentServices.getTaskAssignees(taskId);
+            const previousAssigneeIds = previousAssignees.map(a => a.id);
             
-        //     // Determine which assignees to add and which to remove
-        //     const assigneesToAdd = assigneeIds.filter(id => !previousAssigneeIds.includes(id));
-        //     const assigneesToRemove = previousAssigneeIds.filter(id => !assigneeIds.includes(id));
+            // Determine which assignees to add and which to remove
+            const assigneesToAdd = assigneeIds.filter(id => !previousAssigneeIds.includes(id));
+            const assigneesToRemove = previousAssigneeIds.filter(id => !assigneeIds.includes(id));
             
-        //     // Add new assignees
-        //     for (const newUserId of assigneesToAdd) {
-        //         await taskAssignmentServices.assignTaskToUser(taskId, newUserId);
-        //         // Notify new assignees
-        //         await notificationService.notifyTaskAssigned(taskId, updatedTask, newUserId, userId);
-        //     }
+            // Add new assignees
+            for (const newUserId of assigneesToAdd) {
+                await taskAssignmentServices.assignTaskToUser(taskId, newUserId);
+                // Notify new assignees
+                await notificationService.notifyTaskAssigned(taskId, updatedTask, newUserId, userId);
+            }
             
-        //     // Remove assignees no longer in the list
-        //     for (const removeUserId of assigneesToRemove) {
-        //         await taskAssignmentServices.unassignUserFromTask(taskId, removeUserId);
-        //     }
-        // }
+            // Remove assignees no longer in the list
+            for (const removeUserId of assigneesToRemove) {
+                await taskAssignmentServices.unassignUserFromTask(taskId, removeUserId);
+            }
+        }
         
-        // // Send notifications based on changes
+        // Send notifications based on changes
         
-        // // Check if task was marked as completed
-        // if (validateData.status === 'Done' && taskBeforeUpdate.status !== 'Done') {
-        //     await notificationService.notifyTaskCompleted(taskId, updatedTask, userId);
-        // } else {
-        //     // Otherwise, just notify about the update
-        //     await notificationService.notifyTaskUpdated(taskId, updatedTask, userId);
-        // }
+        // Check if task was marked as completed
+        if (validateData.status === 'Done' && taskBeforeUpdate.status !== 'Done') {
+            await notificationService.notifyTaskCompleted(taskId, updatedTask, userId);
+        } else {
+            // Otherwise, just notify about the update
+            await notificationService.notifyTaskUpdated(taskId, updatedTask, userId);
+        }
         
-        // // Get the task with updated details
-        // const taskWithDetails = await taskServices.getTaskById(taskId);
+        // Get the task with updated details
+        const taskWithDetails = await taskServices.getTaskById(taskId);
     
         res.status(200).json({
             msg: "Task updated successfully",
-            // task: taskWithDetails
-            task: updatedTask
+            task: taskWithDetails
+            // task: updatedTask
         });
     } catch (error) {
         if (error instanceof ZodError) {
