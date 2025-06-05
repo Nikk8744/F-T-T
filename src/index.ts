@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import http from 'http';
 import { setupWebsocket } from './utils/websocket';
+import { initializeScheduledJobs } from './jobs/scheduler';
 
 const app = express();
 const server = http.createServer(app);
@@ -60,4 +61,8 @@ app.use('/api/v1/notifications', notificationRoutes);
 // Start the server
 server.listen(process.env.PORT, () => {
     console.log(`Server running on port: http://localhost:${process.env.PORT}`);
+    
+    // Initialize scheduled jobs after server has started
+    initializeScheduledJobs();
+    console.log('Scheduled jobs initialized');
 });

@@ -14,7 +14,8 @@ export enum NotificationType {
   PROJECT_COMPLETED = 'PROJECT_COMPLETED',
   USER_ADDED_TO_PROJECT = 'USER_ADDED_TO_PROJECT',
   TASK_COMMENT_ADDED = 'TASK_COMMENT_ADDED',
-  DEADLINE_APPROACHING = 'DEADLINE_APPROACHING'
+  DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
+  DEADLINE_MISSED = 'DEADLINE_MISSED'
 }
 
 // Define entity types
@@ -26,7 +27,7 @@ export enum EntityType {
 }
 
 interface NotificationData {
-  userId: number;
+  userId: number; 
   type: NotificationType;
   title: string;
   message: string;

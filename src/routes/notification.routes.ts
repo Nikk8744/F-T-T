@@ -8,9 +8,11 @@ import {
   // getNotificationPreferences,
   // updateNotificationPreference,
   // initializeNotificationPreferences,
-  getUnreadNotificationsCount
+  getUnreadNotificationsCount,
+  manualCheckDeadlines
 } from "../controllers/notification.controller";
 
+// Create router
 const router = Router();
 
 // Apply auth middleware to all routes
@@ -21,6 +23,7 @@ router.route("/").get(getUserNotifications);
 router.route("/unread-count").get(getUnreadNotificationsCount);
 router.route("/mark-read/:notificationId").patch(markNotificationAsRead);
 router.route("/mark-all-read").patch(markAllNotificationsAsRead);
+router.route("/check-deadlines").post(manualCheckDeadlines);
 router.route("/:notificationId").delete(deleteNotification);
 
 // Notification preferences routes - commented out since we're not using preferences for now

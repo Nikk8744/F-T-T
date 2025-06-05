@@ -22,14 +22,19 @@ controllers are responsible for handling HTTP-specific tasks, like getting data 
 
 ### tables
 #### users
-
 #### projects
-
 #### tasks
-
 #### logs
-
 #### project_members
-
 #### task_checklists
+
+## Todos:
+-  write a cron to check due dates of tasks and send notifications for upcoming due date(like 5 hrs before) and also notifications for passed due tasks.
+-  if possible then in getAllUsersProjects lets also send projects that the user is member of so that we will have all the projects related to that user.
+-  add cacheing 
+-  add proper typescript types and interfaces.
+-  add indexing to db schemas 
+-  implement rate-limiting and throttling
+-  
+
 

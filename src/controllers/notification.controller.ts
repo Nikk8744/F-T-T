@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { notificationService, NotificationType } from "../services/Notification.service";
 import { z } from "zod";
+import { checkAllDeadlines } from "../jobs/deadlineNotifications";
 
 // Schema for validating notification preference updates
 const NotificationPreferenceSchema = z.object({
@@ -247,5 +248,25 @@ export const getUnreadNotificationsCount = async (req: Request, res: Response) =
       return;
     }
     res.status(500).json({ error: "Failed to get unread notifications count" });
+  }
+}; 
+
+// Manually trigger deadline checks (admin only)
+export const manualCheckDeadlines = async (req: Request, res: Response) => {
+  try {
+    // Only allow admins to trigger this manually
+    const userRole = req.user?.role;
+    if (userRole !== 'admin') {
+      res.status(403).json({ message: "Unauthorized: Admin access required" });
+      return;
+    }
+    
+    console.log("Manual deadline check triggered by admin");
+    await checkAllDeadlines();
+    
+    res.status(200).json({ message: "Deadline check completed successfully" });
+  } catch (error) {
+    console.error("Error during manual deadline check:", error);
+    res.status(500).json({ message: "Failed to run deadline check" });
   }
 }; 

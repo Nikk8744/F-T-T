@@ -66,7 +66,7 @@ export const unassignUserFromTask = async (req: Request, res: Response) => {
 
     // Get task details before unassigning
     const task = await taskServices.getTaskById(Number(taskId));
-    
+
     await taskAssignmentServices.unassignUserFromTask(
       Number(taskId),
       Number(userId)
