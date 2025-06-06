@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { notificationService, NotificationType } from "../services/Notification.service";
 import { z } from "zod";
-import { checkAllDeadlines } from "../jobs/deadlineNotifications";
+import { checkAllDeadlines } from "../crons/deadlineNotifications";
 
 // Schema for validating notification preference updates
 const NotificationPreferenceSchema = z.object({

@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import http from 'http';
 import { setupWebsocket } from './utils/websocket';
-import { initializeScheduledJobs } from './jobs/scheduler';
+import { initializeScheduledJobs } from './crons/scheduler';
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +47,7 @@ import logRoutes from './routes/log.routes';
 import itemRoutes from './routes/taskChecklist.routes';
 import taskAssignmentRoutes from './routes/taskAssignment.routes';
 import notificationRoutes from './routes/notification.routes';
+import reportRoutes from './routes/report.routes';
 
 // use routes
 app.use('/api/v1/user', userRoutes);
@@ -57,6 +58,7 @@ app.use('/api/v1/logs', logRoutes);
 app.use('/api/v1/items', itemRoutes);
 app.use('/api/v1/taskAssignment', taskAssignmentRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/reports', reportRoutes);
 
 // Start the server
 server.listen(process.env.PORT, () => {
