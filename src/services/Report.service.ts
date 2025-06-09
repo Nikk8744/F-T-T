@@ -6,8 +6,6 @@ export const ReportService = {
   // Project Report Functions
 
   async verifyProjectAccess(projectId: number, userId: number) {
-    console.log("🚀 ~ verifyProjectAccess ~ projectId:", projectId)
-    console.log("🚀 ~ verifyProjectAccess ~ userId:", userId)
     const projectAccess = await db
       .selectFrom("projects")
       .innerJoin("projectmembers", "projectmembers.projectId", "projects.id")
@@ -19,7 +17,6 @@ export const ReportService = {
       .select(["projects.id", "projects.ownerId"])
       .executeTakeFirst();
 
-    console.log("🚀 ~ verifyProjectAccess ~ projectAccess:", projectAccess)
     return !!projectAccess;
   },
 
@@ -114,7 +111,7 @@ export const ReportService = {
     return teamWorkload;
   },
 
-
+  
   async getProjectRiskAssessment(projectId: number, userId: number) {
     // Verify user has access to this project
     const hasAccess = await this.verifyProjectAccess(projectId, userId);

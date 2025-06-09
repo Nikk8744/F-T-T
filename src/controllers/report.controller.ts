@@ -116,7 +116,6 @@ export const downloadProjectReportPdf = async (req: Request, res: Response) => {
     
     // Get report data
     const reportData = await ReportService.getProjectSummary(projectId, userId);
-    console.log("🚀 ~ downloadProjectReportPdf ~ reportData:", reportData)
     
     // Generate and send PDF
     pdfGenerator.generateProjectReport(reportData, res);
@@ -229,10 +228,8 @@ export const downloadTaskReportPdf = async (req: Request, res: Response) => {
     
     // Get report data
     const statusDistribution = await ReportService.getTaskStatusDistribution(userId, projectId);
-    console.log("🚀 ~ downloadTaskReportPdf ~ statusDistribution:", statusDistribution)
     // const priorityAnalysis = await ReportService.getTaskPriorityAnalysis(userId, projectId);
     const overdueTasks = await ReportService.getOverdueTasks(userId, projectId);
-    console.log("🚀 ~ downloadTaskReportPdf ~ overdueTasks:", overdueTasks)
     
     // Combine data for the report
     const reportData = {
