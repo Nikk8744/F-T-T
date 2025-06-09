@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ReportService } from "../services/Report.service";
+import { pdfGenerator } from "../utils/pdfGenerator";
 
 export const getProjectSummary = async (req: Request, res: Response) => {
     try {
@@ -25,50 +26,29 @@ export const getProjectSummary = async (req: Request, res: Response) => {
     }
 }
 
-/* 
-export const getProjectTaskBreakdown = async (req: Request, res: Response) => {
-  try {
-    const projectId = Number(req.params.projectId);
-    const userId = Number(req.user?.id);
-    
-    if (isNaN(projectId) || projectId <= 0) {
-      return res.status(400).json({ msg: 'Invalid project ID' });
-    }
-    
-    const reportData = await reportService.getProjectTaskBreakdown(projectId, userId);
-    
-    return res.status(200).json({
-      msg: 'Project task breakdown report generated successfully',
-      data: reportData
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
-    }
-    return res.status(500).json({ error: 'Failed to generate project task breakdown report' });
-  }
-};
-
 export const getProjectTeamReport = async (req: Request, res: Response) => {
   try {
     const projectId = Number(req.params.projectId);
     const userId = Number(req.user?.id);
     
     if (isNaN(projectId) || projectId <= 0) {
-      return res.status(400).json({ msg: 'Invalid project ID' });
+      res.status(400).json({ msg: 'Invalid project ID' });
+      return;
     }
     
-    const reportData = await reportService.getProjectTeamAllocation(projectId, userId);
+    const reportData = await ReportService.getProjectTeamAllocation(projectId, userId);
     
-    return res.status(200).json({
+    res.status(200).json({
       msg: 'Project team allocation report generated successfully',
       data: reportData
     });
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate project team report' });
+    res.status(500).json({ error: 'Failed to generate project team report' });
+    return;
   }
 };
 
@@ -78,20 +58,49 @@ export const getProjectRiskReport = async (req: Request, res: Response) => {
     const userId = Number(req.user?.id);
     
     if (isNaN(projectId) || projectId <= 0) {
-      return res.status(400).json({ msg: 'Invalid project ID' });
+      res.status(400).json({ msg: 'Invalid project ID' });
+      return;
     }
     
-    const reportData = await reportService.getProjectRiskAssessment(projectId, userId);
+    const reportData = await ReportService.getProjectRiskAssessment(projectId, userId);
     
-    return res.status(200).json({
+    res.status(200).json({
       msg: 'Project risk assessment report generated successfully',
       data: reportData
     });
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate project risk report' });
+    res.status(500).json({ error: 'Failed to generate project risk report' });
+    return; 
+  }
+};
+
+export const getProjectTaskBreakdown = async (req: Request, res: Response) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    const userId = Number(req.user?.id);
+    
+    if (isNaN(projectId) || projectId <= 0) {
+      res.status(400).json({ msg: 'Invalid project ID' });
+      return;
+    }
+    
+    const reportData = await ReportService.getProjectTaskBreakdown(projectId, userId);
+    
+    res.status(200).json({
+      msg: 'Project task breakdown report generated successfully',
+      data: reportData
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ msg: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to generate project task breakdown report' });
+    return;
   }
 };
 
@@ -101,22 +110,52 @@ export const downloadProjectReportPdf = async (req: Request, res: Response) => {
     const userId = Number(req.user?.id);
     
     if (isNaN(projectId) || projectId <= 0) {
-      return res.status(400).json({ msg: 'Invalid project ID' });
+      res.status(400).json({ msg: 'Invalid project ID' });
+      return;
     }
     
     // Get report data
-    const reportData = await reportService.getProjectSummary(projectId, userId);
+    const reportData = await ReportService.getProjectSummary(projectId, userId);
+    console.log("🚀 ~ downloadProjectReportPdf ~ reportData:", reportData)
     
     // Generate and send PDF
     pdfGenerator.generateProjectReport(reportData, res);
     
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate PDF report' });
+    res.status(500).json({ error: 'Failed to generate PDF report' });
+    return;
   }
 };
+
+export const getProjectTimelineReport = async (req: Request, res: Response) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    const userId = Number(req.user?.id);
+
+    if (isNaN(projectId) || projectId <= 0) {
+      res.status(400).json({ msg: 'Invalid project ID' });
+      return;
+    }
+
+    const reportData = await ReportService.getProjectTimeline(projectId, userId); 
+
+    res.status(200).json({
+      msg: 'Project timeline report generated successfully',
+      data: reportData
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ msg: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to generate project timeline report' });
+    return;
+  }
+}
 
 // Task Report Controllers
 export const getTaskStatusReport = async (req: Request, res: Response) => {
@@ -124,77 +163,64 @@ export const getTaskStatusReport = async (req: Request, res: Response) => {
     const userId = Number(req.user?.id);
     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     
-    const reportData = await reportService.getTaskStatusDistribution(userId, projectId);
+    const reportData = await ReportService.getTaskStatusDistribution(userId, projectId);
     
-    return res.status(200).json({
+    res.status(200).json({
       msg: 'Task status report generated successfully',
       data: reportData
     });
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate task status report' });
+    res.status(500).json({ error: 'Failed to generate task status report' });
+    return;
   }
 };
 
-export const getTaskPriorityReport = async (req: Request, res: Response) => {
-  try {
-    const userId = Number(req.user?.id);
-    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
-    
-    const reportData = await reportService.getTaskPriorityAnalysis(userId, projectId);
-    
-    return res.status(200).json({
-      msg: 'Task priority report generated successfully',
-      data: reportData
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
-    }
-    return res.status(500).json({ error: 'Failed to generate task priority report' });
-  }
-};
 
 export const getOverdueTasksReport = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.user?.id);
     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     
-    const reportData = await reportService.getOverdueTasks(userId, projectId);
+    const reportData = await ReportService.getOverdueTasks(userId, projectId);
     
-    return res.status(200).json({
+    res.status(200).json({
       msg: 'Overdue tasks report generated successfully',
       data: reportData
     });
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate overdue tasks report' });
+    res.status(500).json({ error: 'Failed to generate overdue tasks report' });
+    return;
   }
 };
 
-export const getTaskCompletionTrendReport = async (req: Request, res: Response) => {
-  try {
-    const userId = Number(req.user?.id);
-    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
-    const days = req.query.days ? Number(req.query.days) : 30;
+
+
+// export const getTaskPriorityReport = async (req: Request, res: Response) => {
+//   try {
+//     const userId = Number(req.user?.id);
+//     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     
-    const reportData = await reportService.getTaskCompletionTrend(userId, days, projectId);
+//     const reportData = await ReportService.getTaskPriorityAnalysis(userId, projectId);
     
-    return res.status(200).json({
-      msg: 'Task completion trend report generated successfully',
-      data: reportData
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
-    }
-    return res.status(500).json({ error: 'Failed to generate task completion trend report' });
-  }
-};
+//     return res.status(200).json({
+//       msg: 'Task priority report generated successfully',
+//       data: reportData
+//     });
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       return res.status(400).json({ msg: error.message });
+//     }
+//     return res.status(500).json({ error: 'Failed to generate task priority report' });
+//   }
+// };
 
 export const downloadTaskReportPdf = async (req: Request, res: Response) => {
   try {
@@ -202,14 +228,16 @@ export const downloadTaskReportPdf = async (req: Request, res: Response) => {
     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     
     // Get report data
-    const statusDistribution = await reportService.getTaskStatusDistribution(userId, projectId);
-    const priorityAnalysis = await reportService.getTaskPriorityAnalysis(userId, projectId);
-    const overdueTasks = await reportService.getOverdueTasks(userId, projectId);
+    const statusDistribution = await ReportService.getTaskStatusDistribution(userId, projectId);
+    console.log("🚀 ~ downloadTaskReportPdf ~ statusDistribution:", statusDistribution)
+    // const priorityAnalysis = await ReportService.getTaskPriorityAnalysis(userId, projectId);
+    const overdueTasks = await ReportService.getOverdueTasks(userId, projectId);
+    console.log("🚀 ~ downloadTaskReportPdf ~ overdueTasks:", overdueTasks)
     
     // Combine data for the report
     const reportData = {
       statusDistribution,
-      priorityAnalysis,
+      // priorityAnalysis,
       overdueTasks
     };
     
@@ -219,11 +247,33 @@ export const downloadTaskReportPdf = async (req: Request, res: Response) => {
     
   } catch (error) {
     if (error instanceof Error) {
-      return res.status(400).json({ msg: error.message });
+      res.status(400).json({ msg: error.message });
+      return;
     }
-    return res.status(500).json({ error: 'Failed to generate PDF report' });
+    res.status(500).json({ error: 'Failed to generate PDF report' });
+    return;
   }
 };
 
 
-*/
+export const getTaskCompletionTrendReport = async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.user?.id);
+    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
+    const days = req.query.days ? Number(req.query.days) : 30;
+    
+    const reportData = await ReportService.getTaskCompletionTrend(userId, days, projectId);
+    
+    res.status(200).json({
+      msg: 'Task completion trend report generated successfully',
+      data: reportData
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ msg: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to generate task completion trend report' });
+    return;
+  }
+};
