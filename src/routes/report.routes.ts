@@ -4,6 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware";
 import {
   downloadProjectReportPdf,
   downloadTaskReportPdf,
+  getAllProjectsSummary,
   getOverdueTasksReport,
   getProjectRiskReport,
   getProjectSummary,
@@ -28,6 +29,8 @@ router.route("/project/:projectId/risks").get(getProjectRiskReport);
 router.route("/project/:projectId/pdf").get(downloadProjectReportPdf); // left
 router.route("/project/:projectId/tasks").get(getProjectTaskBreakdown);
 router.route("/project/:projectId/timeline").get(getProjectTimelineReport);
+router.route("/project/summary/all").get(getAllProjectsSummary);
+
 
 // Task report routes
 router.route("/tasks/status").get(getTaskStatusReport);

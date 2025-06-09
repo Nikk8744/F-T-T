@@ -238,34 +238,165 @@ export const ReportService = {
 
   // Task Report Methods
   async getTaskStatusDistribution(userId: number, projectId?: number) {
-    // Base query for tasks
+    // If projectId is provided, check if user is the project owner
+    let isProjectOwner = false;
+    if (projectId) {
+      const project = await db
+        .selectFrom("projects")
+        .select(["ownerId"])
+        .where("id", "=", projectId)
+        .executeTakeFirst();
+        
+      if (!project) {
+        throw new Error("Project not found");
+      }
+      
+      isProjectOwner = project.ownerId === userId;
+      
+      // Also verify the user has access to this project
+      const hasAccess = await this.verifyProjectAccess(projectId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied to project");
+      }
+    }
+    
+    // Base query for tasks by status
     let query = db
       .selectFrom("tasks as t")
       .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
       .select([
         "t.status",
         (eb) => eb.fn.count<number>("t.id").as("count")
-      ])
-      .where(eb => eb.or([
-        eb("t.ownerId", "=", userId),
-        eb("ta.userId", "=", userId)
-      ]))
-      .groupBy("t.status");
-
-    // Add project filter if provided
+      ]);
+    
+    // Apply project filter if provided
     if (projectId) {
-      const hasAccess = await this.verifyProjectAccess(projectId, userId);
-      if (!hasAccess) {
-        throw new Error("Access denied to project");
-      }
       query = query.where("t.projectId", "=", projectId);
     }
-
-    const result = await query.execute();
-
-    return result;
+    
+    // If no project specified OR user is not the project owner, only show tasks they own or are assigned to
+    if (!projectId || !isProjectOwner) {
+      query = query.where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]));
+      console.log("🚀 ~ getTaskStatusDistribution ~ query:", query)
+    }
+    
+    const statusDistribution = await query
+    .groupBy("t.status")
+      .execute();
+      console.log("🚀 ~ getTaskStatusDistribution ~ statusDistribution:", statusDistribution)
+      
+    // Calculate total tasks
+    const totalTasks = statusDistribution.reduce((sum, item) => sum + Number(item.count), 0);
+    console.log("🚀 ~ getTaskStatusDistribution ~ totalTasks:", totalTasks)
+    
+    // Get overdue tasks count
+    const now = new Date();
+    let overdueQuery = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select((eb) => eb.fn.count<number>("t.id").as("count"))
+      .where("t.dueDate", "<", now)
+      .where("t.status", "!=", "Done");
+    
+    // Apply project filter if provided
+    if (projectId) {
+      overdueQuery = overdueQuery.where("t.projectId", "=", projectId);
+    }
+    
+    // If no project specified OR user is not the project owner, only show tasks they own or are assigned to
+    if (!projectId || !isProjectOwner) {
+      overdueQuery = overdueQuery.where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]));
+    }
+    
+    const overdueResult = await overdueQuery.executeTakeFirst();
+    const overdueCount = Number(overdueResult?.count || 0);
+    
+    // Get approaching deadlines count
+    const nextWeek = new Date();
+    nextWeek.setDate(now.getDate() + 7);
+    
+    let approachingQuery = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select((eb) => eb.fn.count<number>("t.id").as("count"))
+      .where("t.dueDate", ">=", now)
+      .where("t.dueDate", "<=", nextWeek)
+      .where("t.status", "!=", "Done");
+    
+    // Apply project filter if provided
+    if (projectId) {
+      approachingQuery = approachingQuery.where("t.projectId", "=", projectId);
+    }
+    
+    // If no project specified OR user is not the project owner, only show tasks they own or are assigned to
+    if (!projectId || !isProjectOwner) {
+      approachingQuery = approachingQuery.where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]));
+    }
+    
+    const approachingResult = await approachingQuery.executeTakeFirst();
+    const approachingCount = Number(approachingResult?.count || 0);
+    
+    // Calculate completion rate
+    const completedTasks = statusDistribution.find(item => item.status === "Done")?.count || 0;
+    const completionRate = totalTasks > 0 ? Math.round((Number(completedTasks) / totalTasks) * 100) : 0;
+    
+    // Add percentage to each status
+    const statusWithPercentage = statusDistribution.map(item => ({
+      status: item.status || 'Unset',
+      count: Number(item.count),
+      percentage: totalTasks > 0 ? Math.round((Number(item.count) / totalTasks) * 100) : 0
+    }));
+    
+    // Get most recent completed tasks (last 5)
+    let recentCompletedQuery = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select([
+        "t.id",
+        "t.subject",
+        "t.updatedAt",
+        "t.projectId"
+      ])
+      .where("t.status", "=", "Done")
+      .orderBy("t.updatedAt", "desc")
+      .limit(5);
+    
+    // Apply project filter if provided
+    if (projectId) {
+      recentCompletedQuery = recentCompletedQuery.where("t.projectId", "=", projectId);
+    }
+    
+    // If no project specified OR user is not the project owner, only show tasks they own or are assigned to
+    if (!projectId || !isProjectOwner) {
+      recentCompletedQuery = recentCompletedQuery.where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]));
+    }
+    
+    const recentCompleted = await recentCompletedQuery.execute();
+    
+    return {
+      distribution: statusWithPercentage,
+      totalTasks,
+      completedTasks: Number(completedTasks),
+      completionRate,
+      overdueCount,
+      approachingCount,
+      recentCompleted,
+      // Add a flag to indicate if these are partial stats (user only sees their own tasks)
+      partialStats: projectId ? !isProjectOwner : true
+    };
   },
-
 
   async getOverdueTasks(userId: number, projectId?: number) {
     const now = new Date();
@@ -426,6 +557,158 @@ export const ReportService = {
       });
     }
     return trend;
+  },
+
+  async getAllProjectsSummary(userId: number) {
+    // Get all projects the user owns or is a member of
+    const projects = await db
+      .selectFrom("projects as p")
+      .leftJoin("projectmembers as pm", join => 
+        join.onRef("pm.projectId", "=", "p.id")
+        .on("pm.userId", "=", userId)
+      )
+      .select([
+        "p.id",
+        "p.name",
+        "p.status",
+        "p.startDate",
+        "p.endDate",
+        "p.ownerId",
+        "p.description"
+      ])
+      .where(eb => eb.or([
+        eb("p.ownerId", "=", userId),
+        eb("pm.userId", "=", userId)
+      ]))
+      .distinct()
+      .execute();
+      
+    // For each project, get summary stats
+    const projectSummaries = [];
+    
+    for (const project of projects) {
+      // Check if user is the project owner
+      const isProjectOwner = project.ownerId === userId;
+      
+      // Task query base - different filtering based on user role
+      let taskStatsQuery = db
+        .selectFrom("tasks as t")
+        .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+        .select([
+          "t.status",
+          (eb) => eb.fn.count<number>("t.id").as("count")
+        ])
+        .where("t.projectId", "=", project.id);
+      
+      // If user is not the project owner, only show tasks they own or are assigned to
+      if (!isProjectOwner) {
+        taskStatsQuery = taskStatsQuery.where(eb => eb.or([
+          eb("t.ownerId", "=", userId),
+          eb("ta.userId", "=", userId)
+        ]));
+      }
+      
+      const taskStats = await taskStatsQuery
+        .groupBy("t.status")
+        .execute();
+        
+        // Calculate completion percentage
+        const totalTasks = taskStats.reduce((sum, stat) => sum + Number(stat.count), 0);
+        const completedTasks = taskStats.find(stat => stat.status === "Done")?.count || 0;
+        const completionPercentage = totalTasks > 0 
+          ? Math.round((Number(completedTasks) / totalTasks) * 100) 
+          : 0;
+          
+        // Get overdue tasks count - with proper access control
+        const now = new Date();
+        let overdueTasksQuery = db
+          .selectFrom("tasks as t")
+          .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+          .select((eb) => eb.fn.count<number>("t.id").as("count"))
+          .where("t.projectId", "=", project.id)
+          .where("t.dueDate", "<", now)
+          .where("t.status", "!=", "Done");
+          
+        // If user is not the project owner, only show tasks they own or are assigned to
+        if (!isProjectOwner) {
+          overdueTasksQuery = overdueTasksQuery.where(eb => eb.or([
+            eb("t.ownerId", "=", userId),
+            eb("ta.userId", "=", userId)
+          ]));
+        }
+        
+        const overdueTasks = await overdueTasksQuery.executeTakeFirst();
+          
+        // Get approaching deadlines count - with proper access control
+        const nextWeek = new Date();
+        nextWeek.setDate(now.getDate() + 7);
+        
+        let approachingDeadlinesQuery = db
+          .selectFrom("tasks as t")
+          .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+          .select((eb) => eb.fn.count<number>("t.id").as("count"))
+          .where("t.projectId", "=", project.id)
+          .where("t.dueDate", ">=", now)
+          .where("t.dueDate", "<=", nextWeek)
+          .where("t.status", "!=", "Done");
+          
+        // If user is not the project owner, only show tasks they own or are assigned to
+        if (!isProjectOwner) {
+          approachingDeadlinesQuery = approachingDeadlinesQuery.where(eb => eb.or([
+            eb("t.ownerId", "=", userId),
+            eb("ta.userId", "=", userId)
+          ]));
+        }
+        
+        const approachingDeadlines = await approachingDeadlinesQuery.executeTakeFirst();
+          
+        // Get team members count
+        const teamMembers = await db
+          .selectFrom("projectmembers")
+          .select((eb) => eb.fn.count<number>("userId").as("count"))
+          .where("projectId", "=", project.id)
+          .executeTakeFirst();
+          
+        projectSummaries.push({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          completionPercentage,
+          totalTasks,
+          completedTasks: Number(completedTasks),
+          overdueTasks: Number(overdueTasks?.count || 0),
+          approachingDeadlines: Number(approachingDeadlines?.count || 0),
+          teamMembers: Number(teamMembers?.count || 0) + 1, // +1 for owner
+          isOwner: isProjectOwner,
+          // Add a flag to indicate if these are partial stats (user only sees their own tasks)
+          partialStats: !isProjectOwner
+        });
+    }
+    
+    // Calculate overall statistics
+    const totalProjects = projectSummaries.length;
+    const completedProjects = projectSummaries.filter(p => p.status === "Completed").length;
+    const totalTasks = projectSummaries.reduce((sum, p) => sum + p.totalTasks, 0);
+    const completedTasks = projectSummaries.reduce((sum, p) => sum + p.completedTasks, 0);
+    const overdueTasks = projectSummaries.reduce((sum, p) => sum + p.overdueTasks, 0);
+    const approachingDeadlines = projectSummaries.reduce((sum, p) => sum + p.approachingDeadlines, 0);
+    
+    return {
+      summary: {
+        totalProjects,
+        completedProjects,
+        projectCompletionRate: totalProjects > 0 ? Math.round((completedProjects / totalProjects) * 100) : 0,
+        totalTasks,
+        completedTasks,
+        taskCompletionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        overdueTasks,
+        approachingDeadlines
+      },
+      projects: projectSummaries
+    };
   }
 
 }

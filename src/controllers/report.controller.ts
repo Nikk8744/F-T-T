@@ -274,3 +274,48 @@ export const getTaskCompletionTrendReport = async (req: Request, res: Response) 
     return;
   }
 };
+
+export const getAllProjectsSummary = async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.user?.id);
+    if (isNaN(userId) || userId <= 0) {
+      res.status(400).json({ msg: 'Invalid user ID' });
+      return;
+    }
+    
+    const reportData = await ReportService.getAllProjectsSummary(userId);
+    
+    res.status(200).json({
+      msg: 'All projects summary generated successfully',
+      data: reportData
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(400).json({ msg: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to generate all projects summary' });
+    return;
+  }
+};
+
+// export const downloadAllProjectsSummaryPdf = async (req: Request, res: Response) => {
+//   try {
+//     const userId = Number(req.user?.id);
+//     if (isNaN(userId) || userId <= 0) {
+//       return res.status(400).json({ msg: 'Invalid user ID' });
+//     }
+    
+//     // Get report data
+//     const reportData = await ReportService.getAllProjectsSummary(userId);
+    
+//     // Generate and send PDF
+//     pdfGenerator.generateAllProjectsSummaryPdf(reportData, res);
+    
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       return res.status(400).json({ msg: error.message });
+//     }
+//     return res.status(500).json({ error: 'Failed to generate PDF report' });
+//   }
+// };
