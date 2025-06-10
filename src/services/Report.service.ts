@@ -499,12 +499,13 @@ export const ReportService = {
 
 
   async getTaskCompletionTrend(userId: number, days: number = 30, projectId?: number) {
+    console.log("🚀 ~ getTaskCompletionTrend ~ days:", userId)
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
 
-    // Base query for completed tasks within date range
-    let query = db
+    // Query for completed tasks within date range
+    let completedQuery = db
       .selectFrom("tasks as t")
       .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
       .select([
@@ -518,8 +519,23 @@ export const ReportService = {
       .where("t.status", "=", "Done")
       .where("t.updatedAt", ">=", startDate)
       .where("t.updatedAt", "<=", endDate)
-      // .groupBy((eb) => eb.fn("DATE(t.updatedAt)"))
       .orderBy("t.updatedAt", "asc");
+
+    // Query for created tasks within date range
+    let createdQuery = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select([
+        "t.createdAt",
+        "t.id"
+      ])
+      .where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]))
+      .where("t.createdAt", ">=", startDate)
+      .where("t.createdAt", "<=", endDate)
+      .orderBy("t.createdAt", "asc");
 
     // Add project filter if provided
     if (projectId) {
@@ -527,25 +543,37 @@ export const ReportService = {
       if (!hasAccess) {
         throw new Error("Access denied to project");
       }
-      query = query.where("t.projectId", "=", projectId);
+      completedQuery = completedQuery.where("t.projectId", "=", projectId);
+      createdQuery = createdQuery.where("t.projectId", "=", projectId);
     }
 
-    const taskData = await query.execute();
+    const completedTasks = await completedQuery.execute();
+    const createdTasks = await createdQuery.execute();
 
-    // Fill in missing dates with zero counts
-    const dateMap = new Map();
+    // Maps for completed and created tasks by date
+    const completedMap = new Map();
+    const createdMap = new Map();
 
-    // First populate with data we have
-    taskData.forEach(task => {
+    // Process completed tasks
+    completedTasks.forEach(task => {
       const date = new Date(task.updatedAt);
       const dateStr = date.toISOString().split('T')[0];
 
-      const currentCount = dateMap.get(dateStr) || 0;
-      dateMap.set(dateStr, currentCount + 1); // Increment count for this date  
+      const currentCount = completedMap.get(dateStr) || 0;
+      completedMap.set(dateStr, currentCount + 1);
     });
 
+    // Process created tasks
+    createdTasks.forEach(task => {
+      const date = new Date(task.createdAt);
+      const dateStr = date.toISOString().split('T')[0];
+
+      const currentCount = createdMap.get(dateStr) || 0;
+      createdMap.set(dateStr, currentCount + 1);
+    });
+
+    // Build result with both counts
     const trend = [];
-    // Fill in missing dates
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + i);
@@ -553,9 +581,11 @@ export const ReportService = {
 
       trend.push({
         date: dateStr,
-        count: dateMap.get(dateStr) || 0
+        completed: completedMap.get(dateStr) || 0,
+        created: createdMap.get(dateStr) || 0
       });
     }
+    
     return trend;
   },
 
