@@ -78,6 +78,7 @@ export class PDFGenerator {
     
     // Add header
     this.addHeader(title);
+    console.log("generateTaskReporttttt", data.statusDistribution);
     
     // Status Distribution
     if (data.statusDistribution) {
@@ -94,6 +95,7 @@ export class PDFGenerator {
       
       this.doc.moveDown(1.5);
     }
+    console.log("data.priorityAnalysis", data.priorityAnalysis);
     
     // Priority Analysis
     if (data.priorityAnalysis) {
@@ -130,6 +132,159 @@ export class PDFGenerator {
       );
       
       this.doc.moveDown(1.5);
+    }
+    
+    // Footer
+    this.doc
+      .fontSize(10)
+      .text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' })
+      .moveDown(0.5)
+      .text(`© ${new Date().getFullYear()} Freelance Task Management`, { align: 'center' });
+    
+    // Finalize the PDF
+    this.doc.end();
+  }
+
+  generateAllProjectsReport(data: any, res: Response) {
+    const { summary, projects } = data;
+    
+    // Create a new PDF document
+    this.doc = new PDFDocument({ margin: 50, size: 'A4' });
+    
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=all-projects-report-${Date.now()}.pdf`);
+    
+    // Pipe the PDF to the response
+    this.doc.pipe(res);
+    
+    // Add header
+    this.addHeader('All Projects Report');
+    
+    // Add summary section
+    this.doc
+      .fontSize(14)
+      .font('Helvetica-Bold')
+      .text('Portfolio Summary')
+      .font('Helvetica')
+      .moveDown(0.5);
+      
+    this.doc
+      .fontSize(12)
+      .text(`Total Projects: ${summary.totalProjects}`, { continued: true })
+      .text(`  Completed Projects: ${summary.completedProjects} (${summary.projectCompletionRate}%)`, { align: 'right' })
+      .moveDown(0.5);
+      
+    this.doc
+      .text(`Total Tasks: ${summary.totalTasks}`, { continued: true })
+      .text(`  Completed Tasks: ${summary.completedTasks} (${summary.taskCompletionRate}%)`, { align: 'right' })
+      .moveDown(0.5);
+      
+    this.doc
+      .text(`Overdue Tasks: ${summary.overdueTasks}`, { continued: true })
+      .text(`  Approaching Deadlines: ${summary.approachingDeadlines}`, { align: 'right' })
+      .moveDown(1.5);
+    
+    // Projects overview table
+    this.addSubheader('Projects Overview');
+    this.doc.moveDown(0.5);
+    
+    // Create projects table
+    this.createTable(
+      ['Project Name', 'Status', 'Completion', 'Tasks', 'Overdue'],
+      projects.map((project: any) => [
+        project.name.substring(0, 25) + (project.name.length > 25 ? '...' : ''),
+        project.status,
+        `${project.completionPercentage}%`,
+        `${project.completedTasks}/${project.totalTasks}`,
+        String(project.overdueTasks)
+      ])
+    );
+    
+    // Add individual project details
+    for (let i = 0; i < projects.length; i++) {
+      const project = projects[i];
+      
+      // Add page break if needed
+      if (i > 0) {
+        this.doc.addPage();
+      }
+      
+      // Project header
+      this.addSubheader(`Project: ${project.name}`);
+      this.doc.moveDown(0.5);
+      
+      // Project details
+      this.doc
+        .fontSize(11)
+        .text(`Status: ${project.status}`, { continued: true })
+        .text(`  Completion: ${project.completionPercentage}%`, { align: 'right' })
+        .moveDown(0.3);
+        
+      if (project.description) {
+        this.doc
+          .fontSize(10)
+          .text(`Description: ${project.description.substring(0, 200)}${project.description.length > 200 ? '...' : ''}`)
+          .moveDown(0.3);
+      }
+      
+      // Timeline
+      const startDate = project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set';
+      const endDate = project.endDate ? new Date(project.endDate).toLocaleDateString() : 'Not set';
+      
+      this.doc
+        .text(`Timeline: ${startDate} to ${endDate}`)
+        .moveDown(0.3);
+        
+      this.doc
+        .text(`Team Members: ${project.teamMembers}`, { continued: true })
+        .text(`  Your Role: ${project.isOwner ? 'Owner' : 'Member'}`, { align: 'right' })
+        .moveDown(1);
+        
+      // Task summary
+      this.doc
+        .fontSize(12)
+        .font('Helvetica-Bold')
+        .text('Task Summary')
+        .font('Helvetica')
+        .moveDown(0.5);
+        
+      this.doc
+        .fontSize(10)
+        .text(`Total Tasks: ${project.totalTasks}`, { continued: true })
+        .text(`  Completed: ${project.completedTasks}`, { align: 'right' })
+        .moveDown(0.3);
+        
+      this.doc
+        .text(`Overdue Tasks: ${project.overdueTasks}`, { continued: true })
+        .text(`  Approaching Deadlines: ${project.approachingDeadlines}`, { align: 'right' })
+        .moveDown(0.5);
+        
+      // If tasks are included, show them
+      if (project.tasks && project.tasks.length > 0) {
+        this.doc
+          .fontSize(11)
+          .font('Helvetica-Bold')
+          .text('Overdue Tasks')
+          .font('Helvetica')
+          .moveDown(0.5);
+          
+        this.createTable(
+          ['Task', 'Due Date', 'Days Overdue'],
+          project.tasks.slice(0, 5).map((task: any) => [
+            task.subject.substring(0, 30) + (task.subject.length > 30 ? '...' : ''),
+            new Date(task.dueDate).toLocaleDateString(),
+            String(task.daysOverdue)
+          ])
+        );
+        
+        if (project.tasks.length > 5) {
+          this.doc
+            .fontSize(9)
+            .text(`... and ${project.tasks.length - 5} more tasks`)
+            .moveDown(0.5);
+        }
+      }
     }
     
     // Footer

@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
 import {
+  downloadAllProjectsReportPdf,
   downloadProjectReportPdf,
   downloadTaskReportPdf,
   getAllProjectsSummary,
@@ -30,6 +31,7 @@ router.route("/project/:projectId/pdf").get(downloadProjectReportPdf); // left
 router.route("/project/:projectId/tasks").get(getProjectTaskBreakdown);
 router.route("/project/:projectId/timeline").get(getProjectTimelineReport);
 router.route("/project/summary/all").get(getAllProjectsSummary);
+router.route("/project/summary/all/pdf").get(downloadAllProjectsReportPdf);
 
 
 // Task report routes

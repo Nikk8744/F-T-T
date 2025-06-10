@@ -243,12 +243,11 @@ export const downloadTaskReportPdf = async (req: Request, res: Response) => {
     pdfGenerator.generateTaskReport(reportData, res, title);
     
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
+    // Only handle errors if headers haven't been sent
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to generate PDF report' });
       return;
     }
-    res.status(500).json({ error: 'Failed to generate PDF report' });
-    return;
   }
 };
 
@@ -299,23 +298,45 @@ export const getAllProjectsSummary = async (req: Request, res: Response) => {
   }
 };
 
-// export const downloadAllProjectsSummaryPdf = async (req: Request, res: Response) => {
-//   try {
-//     const userId = Number(req.user?.id);
-//     if (isNaN(userId) || userId <= 0) {
-//       return res.status(400).json({ msg: 'Invalid user ID' });
-//     }
+export const downloadAllProjectsReportPdf = async (req: Request, res: Response) => {
+  console.log("downloadAllProjectsReportPdf");
+  try {
+    const userId = Number(req.user?.id);
+    if (isNaN(userId) || userId <= 0) {
+      res.status(400).json({ msg: 'Invalid user ID' });
+      return;
+    }
     
-//     // Get report data
-//     const reportData = await ReportService.getAllProjectsSummary(userId);
+    // Get query parameters for customization
+    const includeTaskDetails = req.query.includeTasks === 'true';
+    const filterStatus = req.query.status as string | undefined;
     
-//     // Generate and send PDF
-//     pdfGenerator.generateAllProjectsSummaryPdf(reportData, res);
+    // Get report data using existing service
+    const reportData = await ReportService.getAllProjectsSummary(userId);
     
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       return res.status(400).json({ msg: error.message });
-//     }
-//     return res.status(500).json({ error: 'Failed to generate PDF report' });
-//   }
-// };
+    // Apply any filters
+    if (filterStatus) {
+      reportData.projects = reportData.projects.filter(p => p.status === filterStatus);
+    }
+    
+    // If requested, get detailed task data for each project
+    if (includeTaskDetails) {
+      for (const project of reportData.projects) {
+        // Get tasks for this project that the user has access to
+        const tasks = await ReportService.getOverdueTasks(userId, project.id);
+        (project as any).tasks = tasks;
+      }
+    }
+    
+    // Generate and send PDF
+    await pdfGenerator.generateAllProjectsReport(reportData, res);
+    
+  } catch (error) {
+    console.error('Error generating all projects report PDF:', error);
+    if (error instanceof Error) {
+      res.status(400).json({ msg: error.message });
+      return;
+    }
+    res.status(500).json({ error: 'Failed to generate PDF report' });
+  }
+};
