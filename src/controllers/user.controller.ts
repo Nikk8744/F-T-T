@@ -96,6 +96,7 @@ const login = async (req: Request, res: Response) => {
         const user = await userServices.authenticateService(email, password);
         if (!user) {
             res.status(400).json({ msg: "Invalid email or password!!" });
+            return;
         }
     
         const tokens = await userServices.generateAuthTokens(user)

@@ -1,4 +1,4 @@
-# 🚀 Freelance Task Tracker API
+# 🚀 TRACKSY API  - Freelance Task Tracker API
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9+-blue.svg)](https://www.typescriptlang.org/)
 [![Express](https://img.shields.io/badge/Express-4.18+-green.svg)](https://expressjs.com/)
@@ -10,7 +10,7 @@ A robust TypeScript-based API for freelancers and teams to manage projects, task
 
 ## 📋 Table of Contents
 
-- [🚀 Freelance Task Tracker API](#-freelance-task-tracker-api)
+- [🚀 TRACKSY API  - Freelance Task Tracker API](#-tracksy-api----freelance-task-tracker-api)
   - [📋 Table of Contents](#-table-of-contents)
   - [✨ Features](#-features)
   - [🏗 Architecture](#-architecture)

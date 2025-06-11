@@ -134,8 +134,6 @@ export class PDFGenerator {
   }
 
   generateTaskReport(data: any, res: Response, title: string = 'Task Report') {
-    console.log("generateTaskReporttttt", data.statusDistribution);
-
     // Create a new PDF document
     this.doc = new PDFDocument({ margin: 50, size: 'A4' });
 

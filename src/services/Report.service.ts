@@ -499,8 +499,7 @@ export const ReportService = {
 
 
   async getTaskCompletionTrend(userId: number, days: number = 30, projectId?: number) {
-    console.log("🚀 ~ getTaskCompletionTrend ~ days:", userId)
-    const endDate = new Date();
+    const endDate = new Date(new Date().setDate(new Date().getDate() + 1));
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
 
