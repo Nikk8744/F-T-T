@@ -35,11 +35,14 @@ app.get("/", (req, res) => {
 
 app.use(cors({
     origin: `${process.env.FRONTEND_URL}`,
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Set-Cookie']
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
 // import routes
 import userRoutes from './routes/user.routes';
@@ -64,9 +67,9 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // Start the server
-server.listen(PORT,'0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port: http://localhost:${PORT}`);
-    
+
     // Initialize scheduled jobs after server has started
     initializeScheduledJobs();
     console.log('Scheduled jobs initialized');
