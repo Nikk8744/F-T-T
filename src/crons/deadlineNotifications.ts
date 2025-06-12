@@ -4,9 +4,7 @@ import { notificationService, NotificationType, EntityType } from "../services/N
 // Configuration
 const APPROACHING_DEADLINE_DAYS = 2; // Consider deadline approaching if within 2 days
 
-/**
- * Check for tasks with approaching deadlines and send notifications
- */
+// Check for tasks with approaching deadlines and send notifications
 export async function checkTaskDeadlines(): Promise<void> {
   try {
     // Get current date
@@ -73,9 +71,8 @@ export async function checkTaskDeadlines(): Promise<void> {
   }
 }
 
-/**
- * Check for projects with approaching deadlines and send notifications
- */
+
+// Check for projects with approaching deadlines and send notifications
 export async function checkProjectDeadlines(): Promise<void> {
   try {
     // Get current date
@@ -140,9 +137,7 @@ export async function checkProjectDeadlines(): Promise<void> {
   }
 }
 
-/**
- * Send notifications for task deadlines
- */
+// Send notifications for task deadlines
 async function sendTaskDeadlineNotifications(task: any, isApproaching: boolean): Promise<void> {
   try {
     // Get task assignees
@@ -199,9 +194,7 @@ async function sendTaskDeadlineNotifications(task: any, isApproaching: boolean):
   }
 }
 
-/**
- * Send notifications for project deadlines
- */
+//  Send notifications for project deadlines
 async function sendProjectDeadlineNotifications(project: any, isApproaching: boolean): Promise<void> {
   try {
     // Get all project members

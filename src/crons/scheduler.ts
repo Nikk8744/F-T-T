@@ -6,12 +6,8 @@ let deadlineCheckTask: cron.ScheduledTask | null = null;
 
 // Default cron expression
 const DEFAULT_CRON_EXPRESSION = '0 0 * * *'; // Run at midnight every day (00:00)
-const INITIAL_DELAY = 60 * 1000; // 1 minute delay on startup for initial run
+// const INITIAL_DELAY = 60 * 1000; // 1 minute delay on startup for initial run
 
-/**
- * Start the deadline check scheduler with a cron expression
- * @param cronExpression - Cron expression (defaults to midnight daily)
- */
 export function startDeadlineScheduler(cronExpression: string = DEFAULT_CRON_EXPRESSION): void {
   // Stop any existing job
   stopDeadlineScheduler();
@@ -41,9 +37,8 @@ export function startDeadlineScheduler(cronExpression: string = DEFAULT_CRON_EXP
   console.log(`Next scheduled check will occur according to cron expression: ${cronExpression}`);
 }
 
-/**
- * Stop the deadline check scheduler
- */
+
+// Stop the deadline check scheduler
 export function stopDeadlineScheduler(): void {
   if (deadlineCheckTask) {
     deadlineCheckTask.stop();
@@ -52,9 +47,8 @@ export function stopDeadlineScheduler(): void {
   }
 }
 
-/**
- * Initialize all scheduled jobs
- */
+
+//  Initialize all scheduled jobs
 export function initializeScheduledJobs(): void {
   // Default - run at midnight every day
   startDeadlineScheduler();

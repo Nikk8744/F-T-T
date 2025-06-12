@@ -104,7 +104,8 @@ const login = async (req: Request, res: Response) => {
             httpOnly: true, // this prevents frontend from accessing cookie
             secure: true, // this makes sure ke cookie is sent form secure https 
             sameSite: 'None' as 'none',
-            path: '/'
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000,
         }
     
         const { password: _, refreshToken: __, ...safeUser } = user;
