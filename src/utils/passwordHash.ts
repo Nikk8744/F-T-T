@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export const hashPassword = {
     async hash <T extends { password?: string}> (data: T): Promise<T> {
