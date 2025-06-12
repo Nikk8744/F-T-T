@@ -101,8 +101,8 @@ const login = async (req: Request, res: Response) => {
     
         const tokens = await userServices.generateAuthTokens(user)
         const options = {
-            httpsOnly: true, // this prevents frontend from accessing cookie
-            secure: true // this makes sure ke cookie sirf secure env se transmit horhi hai
+            httpOnly: true, // this prevents frontend from accessing cookie
+            secure: true // this makes sure ke cookie is sent form secure https 
         }
     
         const { password: _, refreshToken: __, ...safeUser } = user;
@@ -125,7 +125,7 @@ const login = async (req: Request, res: Response) => {
 
 const logout = async(req: /*LogoutRequest*/Request, res: Response) => {
     const options = {
-        httpsOnly: true, 
+        httpOnly: true, 
         secure: true 
     }
     if(req.user?.id){
