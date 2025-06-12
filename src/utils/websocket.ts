@@ -9,7 +9,7 @@ const activeConnections: Map<number, string[]> = new Map();
 export const setupWebsocket = (server: HttpServer) => {
   const io = new WebSocketServer(server, {
     cors: {
-      origin: 'http://localhost:3000',
+      origin: `${process.env.FRONTEND_URL}`,
       methods: ['GET', 'POST'],
       credentials: true
     }
