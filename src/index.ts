@@ -10,6 +10,8 @@ import { initializeScheduledJobs } from './crons/scheduler';
 const app = express();
 const server = http.createServer(app);
 
+const PORT = parseInt(process.env.PORT || '5000', 10);
+
 // Setup WebSocket
 const io = setupWebsocket(server);
 // Make io available globally
@@ -61,8 +63,8 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // Start the server
-server.listen(process.env.PORT, () => {
-    console.log(`Server running on port: http://localhost:${process.env.PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port: http://localhost:${PORT}`);
     
     // Initialize scheduled jobs after server has started
     initializeScheduledJobs();
