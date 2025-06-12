@@ -63,7 +63,7 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
 // Start the server
-server.listen('https://f-t-t.onrender.com', () => {
+server.listen(PORT,'0.0.0.0', () => {
     console.log(`Server running on port: http://localhost:${PORT}`);
     
     // Initialize scheduled jobs after server has started
