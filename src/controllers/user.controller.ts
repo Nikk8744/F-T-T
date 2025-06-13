@@ -100,21 +100,19 @@ const login = async (req: Request, res: Response) => {
         }
     
         const tokens = await userServices.generateAuthTokens(user)
-        // const options = {
-        //     httpOnly: true, // this prevents frontend from accessing cookie
-        //     secure: true, // this makes sure ke cookie is sent form secure https 
-        //     sameSite: 'None' as 'none',
-        //     path: '/',
-        //     maxAge: 24 * 60 * 60 * 1000,
-        // }
+        const options = {
+            httpOnly: true, // this prevents frontend from accessing cookie
+            secure: false, // this makes sure ke cookie is sent form secure https 
+            sameSite: 'None' as 'none',
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000,
+        }
     
         const { password: _, refreshToken: __, ...safeUser } = user;
     
         res.status(200)
-            // .cookie("accessToken", tokens.accessToken, options)
-            // .cookie("refreshToken", tokens.refreshToken, options)
-            .cookie("accessToken", tokens.accessToken)
-            .cookie("refreshToken", tokens.refreshToken)
+            .cookie("accessToken", tokens.accessToken, options)
+            .cookie("refreshToken", tokens.refreshToken, options)
             .json({
                 msg: "Login successful!!",
                 user: safeUser
