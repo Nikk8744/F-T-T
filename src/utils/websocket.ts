@@ -14,10 +14,16 @@ export const setupWebsocket = (server: HttpServer) => {
       credentials: true
     }
   });
-
   // Authentication middleware
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    // Get token from auth or cookies
+    const token = socket.handshake.auth.token ||
+      socket.handshake.headers.cookie?.split(';')
+        .find(c => c.trim().startsWith('accessToken='))
+        ?.split('=')[1]
+        ?.trim();  // trim to remove any whitespace
+
+    console.log("🚀 ~ io.use ~ token:", token)
     if (!token) {
       return next(new Error('Authentication error: Token missing'));
     }
@@ -41,17 +47,18 @@ export const setupWebsocket = (server: HttpServer) => {
     }
     activeConnections.get(userId)?.push(socket.id);
 
+    console.log("🚀 ~ io.on ~ activeConnections:", activeConnections)
     // Send unread notifications count on connection
     sendUnreadNotificationsCount(socket, userId);
 
     // Handle disconnect
     socket.on('disconnect', () => {
       console.log(`User ${userId} disconnected`);
-      
+
       // Remove socket from active connections
       const userSockets = activeConnections.get(userId) || [];
       const updatedSockets = userSockets.filter(id => id !== socket.id);
-      
+
       if (updatedSockets.length === 0) {
         activeConnections.delete(userId);
       } else {
@@ -87,6 +94,7 @@ export const setupWebsocket = (server: HttpServer) => {
 async function sendUnreadNotificationsCount(socket: any, userId: number) {
   try {
     const count = await notificationService.getUnreadNotificationsCount(userId);
+    console.log("🚀 ~ sendUnreadNotificationsCount ~ count:", count)
     socket.emit('unreadNotificationsCount', { count });
   } catch (error) {
     console.error('Error getting unread notifications count:', error);
@@ -113,6 +121,7 @@ export async function sendNotificationToUser(userId: number, notification: any) 
 
   // Update unread count
   const count = await notificationService.getUnreadNotificationsCount(userId);
+  console.log("🚀 ~ sendNotificationToUser ~ count:", count)
   socketIds.forEach(socketId => {
     io.to(socketId).emit('unreadNotificationsCount', { count });
   });

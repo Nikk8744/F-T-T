@@ -11,9 +11,6 @@ const app = express();
 const server = http.createServer(app);
 
 const PORT = parseInt(process.env.PORT || '5000', 10);
-
-// Setup WebSocket
-const io = setupWebsocket(server);
 // Make io available globally
 declare global {
     var io: any;
@@ -27,6 +24,22 @@ declare global {
         }
     }
 }
+
+// Setup middleware first
+app.use(cors({
+    origin: `${process.env.FRONTEND_URL}`,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Set-Cookie']
+}));
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
+
+// Setup WebSocket after middleware
+const io = setupWebsocket(server);
+
 global.io = io;
 
 app.get("/", (req, res) => {
