@@ -13,7 +13,7 @@ const addMemberToProject = async (req: Request, res: Response) => {
     
         const result = await projectMemberServices.addMembersToProject(projectId, currentUser, userId);
         if (!result) {
-            res.status(400).json({ msg: 'Failed to add member to project' });
+            res.status(200).json({ msg: 'Failed to add member to project' });
             return;
         }
         
@@ -49,7 +49,7 @@ const removeMember = async (req: Request, res: Response): Promise<void> => {
     try {
         const result = await projectMemberServices.removeMembersFromProject(projectId, userId);
         if (!result) {
-            res.status(400).json({ msg: 'Failed to remove member from project' });
+            res.status(200).json({ msg: 'Failed to remove member from project' });
             return;
         }
     
@@ -69,7 +69,7 @@ const getAllMembersOfAProject = async (req: Request, res: Response) => {
     try {
         const allMembers = await projectMemberServices.getAllMembersOfAProject(projectId, Number(req.user?.id));
         if (!allMembers) {
-            res.status(400).json({ msg: 'Failed to get all members of project' });
+            res.status(200).json({ msg: 'Failed to get all members of project' });
             return;
         }
     
@@ -97,7 +97,7 @@ const getAllProjectsAUserIsMemberOf = async (req: Request, res: Response) => {
     try {
         const allProjects = await projectMemberServices.getAllProjectsAUserIsMemberOf(userId);
         if (!allProjects || !allProjects.length) {
-            res.status(400).json({ msg: 'No projects found' });
+            res.status(200).json({ msg: 'No projects found' });
             return;
         }
         res.status(200).json({
