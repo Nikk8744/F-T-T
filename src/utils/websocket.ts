@@ -23,7 +23,6 @@ export const setupWebsocket = (server: HttpServer) => {
         ?.split('=')[1]
         ?.trim();  // trim to remove any whitespace
 
-    console.log("🚀 ~ io.use ~ token:", token)
     if (!token) {
       return next(new Error('Authentication error: Token missing'));
     }
@@ -47,7 +46,6 @@ export const setupWebsocket = (server: HttpServer) => {
     }
     activeConnections.get(userId)?.push(socket.id);
 
-    console.log("🚀 ~ io.on ~ activeConnections:", activeConnections)
     // Send unread notifications count on connection
     sendUnreadNotificationsCount(socket, userId);
 
@@ -94,7 +92,6 @@ export const setupWebsocket = (server: HttpServer) => {
 async function sendUnreadNotificationsCount(socket: any, userId: number) {
   try {
     const count = await notificationService.getUnreadNotificationsCount(userId);
-    console.log("🚀 ~ sendUnreadNotificationsCount ~ count:", count)
     socket.emit('unreadNotificationsCount', { count });
   } catch (error) {
     console.error('Error getting unread notifications count:', error);

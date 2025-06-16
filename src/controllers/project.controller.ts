@@ -32,12 +32,12 @@ const createProject = async (req: /*ICreateProject*/Request, res: Response): Pro
             description: validatedProject.description || "",
         };
         const project = await projectServices.createProject(projectData);
-        
+
         // Send notification about project creation
         if (project) {
             await notificationService.notifyTaskCreated(project.id, project, userId);
         }
-        
+
         res.status(200).json({
             msg: "Project created successfully!!!",
             project: project,
@@ -56,15 +56,17 @@ const createProject = async (req: /*ICreateProject*/Request, res: Response): Pro
 };
 
 const getProjectById = async (req: Request, res: Response) => {
+    const projectId = Number(req.params.id);
+    if (!projectId) {
+        res.status(400).json({ msg: "Invalid project id" });
+        return;
+    }
+    
     try {
-        const projectId = Number(req.params.id);
-        if (!projectId) {
-            throw new Error("Invalid project id");
-        }
         const project = await projectServices.getProjectById(projectId);
 
         if (!project) {
-            res.status(404).json({ msg: "Project not found!!" });
+            res.status(200).json({ msg: "Project not found!!" });
             return;
         }
 
@@ -91,7 +93,7 @@ const updateProject = async (req: Request, res: Response) => {
     try {
         const project = await projectServices.getProjectById(projectId);
         if (!project) {
-            res.status(404).json({ msg: "Project not found!" });
+            res.status(200).json({ msg: "Project not found!" });
             return;
         }
 
@@ -105,7 +107,7 @@ const updateProject = async (req: Request, res: Response) => {
         }
 
         const validatedProject = updateProjectSchema.parse({ ...req.body, id: projectId });
-        
+
         // Check if status is being updated to 'Completed'
         const isCompletingProject = validatedProject.status === 'Completed' && project.status !== 'Completed';
 
@@ -117,10 +119,10 @@ const updateProject = async (req: Request, res: Response) => {
         };
         const updatedProject = await projectServices.updateProject(projectId, updatedData);
         if (!updatedProject) {
-            res.status(404).json({ msg: "Project not found!!" });
+            res.status(200).json({ msg: "Project not found!!" });
             return;
         }
-        
+
         // Send notification if project is being completed
         if (isCompletingProject) {
             console.log("Project completed notification sent");
@@ -162,7 +164,7 @@ const deleteProject = async (req: Request, res: Response) => {
 
         const project = await projectServices.getProjectById(projectId);
         if (!project) {
-            res.status(404).json({ msg: "Project not found!" });
+            res.status(200).json({ msg: "Project not found!" });
             return;
         }
 
@@ -196,11 +198,12 @@ const getAllProjectsOfAUser = async (req: Request, res: Response): Promise<void>
     try {
         const allProjects = await projectServices.getAllProjectsOfAUser(userId);
         if (!allProjects || allProjects.length === 0) {
-            res.status(400).json({ msg: "No projects found!!" });
+            res.status(200).json({ status: "success", msg: "No projects found!!" });
             return;
         }
 
         res.status(200).json({
+            status: "success",
             msg: "All projects fetched successfully",
             projects: allProjects
         });
