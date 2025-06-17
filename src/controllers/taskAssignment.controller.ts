@@ -3,6 +3,12 @@ import { taskAssignmentServices } from "../services/TaskAssignment.service";
 import { z } from "zod";
 import { notificationService } from "../services/Notification.service";
 import { taskServices } from "../services/Task.service";
+import { 
+    sendSuccess, 
+    sendNotFound, 
+    sendError, 
+    sendValidationError 
+} from "../utils/apiResponse";
 
 // Schema for validating taskId and userId parameters
 const TaskUserParamsSchema = z.object({
@@ -40,20 +46,13 @@ export const assignUserToTask = async (req: Request, res: Response) => {
       await notificationService.notifyTaskAssigned(Number(taskId), task, Number(userId), initiatorId);
     }
 
-    res.status(200).json({
-      msg: "User assigned to task successfully",
-      data: result
-    });
+    sendSuccess(res, result, 'User assigned to task successfully');
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
       return;
     }
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-    }
-    res.status(500).json({ error: "Failed to assign user to task" });
+    sendError(res, error);
   }
 };
 
@@ -90,19 +89,13 @@ export const unassignUserFromTask = async (req: Request, res: Response) => {
     }
     */
 
-    res.status(200).json({
-      msg: "User unassigned from task successfully"
-    });
+    sendSuccess(res, null, 'User unassigned from task successfully');
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
       return;
     }
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-    }
-    res.status(500).json({ error: "Failed to unassign user from task" });
+    sendError(res, error);
   }
 };
 
@@ -110,7 +103,7 @@ export const bulkAssignUsersToTask = async (req: Request, res: Response) => {
   try {
     const taskId = Number(req.params.taskId);
     if (isNaN(taskId) || taskId <= 0) {
-      res.status(400).json({ msg: "Invalid task ID" });
+      sendValidationError(res, 'Invalid task ID');
       return;
     }
 
@@ -132,43 +125,29 @@ export const bulkAssignUsersToTask = async (req: Request, res: Response) => {
       }
     }
 
-    res.status(200).json({
-      msg: "Users assigned to task successfully",
-      data: results
-    });
+    sendSuccess(res, results, 'Users assigned to task successfully');
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
       return;
     }
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-    }
-    res.status(500).json({ error: "Failed to assign users to task" });
+    sendError(res, error);
   }
 };
 
 export const getTaskAssignees = async (req: Request, res: Response) => {
   try {
     const taskId = Number(req.params.taskId);
+
     if (isNaN(taskId) || taskId <= 0) {
-      res.status(400).json({ msg: "Invalid task ID" });
+      sendValidationError(res, 'Invalid task ID');
       return;
     }
 
     const assignees = await taskAssignmentServices.getTaskAssignees(taskId);
-
-    res.status(200).json({
-      msg: "Task assignees retrieved successfully",
-      data: assignees
-    });
+    sendSuccess(res, assignees, 'Task assignees retrieved successfully');
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-    }
-    res.status(500).json({ error: "Failed to get task assignees" });
+    sendError(res, error);
   }
 };
 
@@ -176,22 +155,13 @@ export const getUserAssignedTasks = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.userId);
     if (isNaN(userId) || userId <= 0) {
-      res.status(400).json({ msg: "Invalid user ID" });
+      sendValidationError(res, 'Invalid user ID');
       return;
     }
-
     const tasks = await taskAssignmentServices.getUserAssignedTasks(userId);
-
-    res.status(200).json({
-      msg: "User assigned tasks retrieved successfully",
-      data: tasks
-    });
+    sendSuccess(res, tasks, 'User assigned tasks retrieved successfully');
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-    }
-    res.status(500).json({ error: "Failed to get user assigned tasks" });
+    sendError(res, error);
   }
 };
 

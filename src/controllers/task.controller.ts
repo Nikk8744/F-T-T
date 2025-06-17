@@ -5,6 +5,14 @@ import { ZodError } from "zod";
 import { projectServices } from "../services/Project.service";
 import { taskAssignmentServices } from "../services/TaskAssignment.service";
 import { notificationService } from "../services/Notification.service";
+import { 
+    sendSuccess, 
+    sendNotFound, 
+    sendError, 
+    sendUnauthorized, 
+    sendForbidden, 
+    sendValidationError 
+} from "../utils/apiResponse";
 
 const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -16,8 +24,8 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
         // Create the task with the user as owner
         const task = await taskServices.createTask(projectId, validateData, userId);
         
-        if(!task){
-            res.status(404).json({ message: "Task not created" });
+        if(!task) {
+            sendNotFound(res, "Task not created");
             return;
         }
         
@@ -37,71 +45,55 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
         // Get the task with all its details
         const taskWithDetails = await taskServices.getTaskById(task.id); 
         
-        res.status(200).json({
-            message: "Task created successfully",
-            task: taskWithDetails
-        });
+        sendSuccess(res, taskWithDetails, "Task created successfully");
     } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ errors: error.errors });
-            return;
-        }
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Task creation failed' });
+        sendError(res, error);
     }
 };
 
 const getTask = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
+    if (!taskId) {
+        sendValidationError(res, "Invalid task id");
+        return;
+    }
+
     try {
         const task = await taskServices.getTaskById(taskId);
         if (!task) {
-            res.status(404).json({ message: "Task not found" });
+            sendNotFound(res, "Task not found");
             return;
         }
     
-        res.status(200).json({
-            msg: "Task retrieved successfully",
-            task
-        });
+        sendSuccess(res, task, "Task retrieved successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Failed to fetch task' });
+        sendError(res, error);
     }
 };
 
 const deleteTask = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
     if (isNaN(taskId) || taskId <= 0) {
-        res.status(400).json({ msg: "Invalid task id" });
+        sendValidationError(res, "Invalid task id");
         return;
     }
+
     try {
         const deletedTask = await taskServices.deleteTask(taskId);
-        if(!deletedTask){
-            res.status(404).json({ message: "Task not found" });
+        if(!deletedTask) {
+            sendNotFound(res, "Task not found");
             return;
         }
-        res.status(200).json({ message: "Task deleted successfully" });
+        sendSuccess(res, null, "Task deleted successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Task deletion failed' });
+        sendError(res, error);
     }
 };
 
 const updateTask = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
     if (isNaN(taskId) || taskId <= 0) {
-        res.status(400).json({ msg: "Invalid task id" });
+        sendValidationError(res, "Invalid task id");
         return;
     }
 
@@ -112,14 +104,14 @@ const updateTask = async (req: Request, res: Response) => {
         // Get the task before update to check status changes
         const taskBeforeUpdate = await taskServices.getTaskById(taskId);
         if (!taskBeforeUpdate) {
-            res.status(404).json({ message: "Task not found" });
+            sendNotFound(res, "Task not found");
             return;
         }
         
         // Update the task basic info
         const updatedTask = await taskServices.updateTask(taskId, validateData);
-        if(!updatedTask){
-            res.status(404).json({ message: "Task not found" });
+        if(!updatedTask) {
+            sendNotFound(res, "Task not found");
             return;
         }
         
@@ -160,21 +152,9 @@ const updateTask = async (req: Request, res: Response) => {
         // Get the task with updated details
         const taskWithDetails = await taskServices.getTaskById(taskId);
     
-        res.status(200).json({
-            msg: "Task updated successfully",
-            task: taskWithDetails
-            // task: updatedTask
-        });
+        sendSuccess(res, taskWithDetails, "Task updated successfully");
     } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ errors: error.errors });
-            return;
-        }
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error" });
+        sendError(res, error);
     }
 };
 
@@ -182,46 +162,32 @@ const getProjectTasks = async (req: Request, res: Response) => {
     try {
         const projectId = Number(req.params.projectId);
         if (isNaN(projectId) || projectId <= 0) {
-            res.status(400).json({ msg: "Invalid project id" });
+            sendValidationError(res, "Invalid project id");
             return;
         }
     
         const allTasks = await taskServices.getProjectTasks(projectId);
-        if(!allTasks){
-            res.status(404).json({ message: "Project not found" });
+        if(!allTasks) {
+            sendNotFound(res, "Project not found");
             return;
         }
     
-        res.status(200).json({
-            msg: "Tasks retrieved successfully",
-            tasks: allTasks,
-        });
+        sendSuccess(res, allTasks, "Tasks retrieved successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error",  error });
+        sendError(res, error);
     }
 };
 
 const getAllTasks = async (req: Request, res: Response) => {
     try {
         const allTasks = await taskServices.getAllTasks();
-        if(!allTasks || allTasks.length === 0){
-            res.status(404).json({ message: "No tasks found" });
+        if(!allTasks || allTasks.length === 0) {
+            sendNotFound(res, "No tasks found");
             return;
         }
-        res.status(200).json({
-            msg: "Tasks retrieved successfully",
-            tasks: allTasks,
-        });
+        sendSuccess(res, allTasks, "Tasks retrieved successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Failed to fetch tasks' });
+        sendError(res, error);
     }
 };
 
@@ -229,20 +195,13 @@ const getUsersTasks = async (req: Request, res: Response) => {
     try {
         const userId = Number(req.params?.userId || req.user?.id);
         if (isNaN(userId) || userId <= 0) {
-            res.status(400).json({ msg: "Invalid user id" });
+            sendValidationError(res, "Invalid user id");
             return;
         }
         const tasks = await taskServices.getUserTasks(userId);
-        res.status(200).json({
-            msg: "Tasks retrieved successfully",
-            tasks: tasks,
-        });
+        sendSuccess(res, tasks, "Tasks retrieved successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Failed to fetch user tasks' });
+        sendError(res, error);
     }
 };
 

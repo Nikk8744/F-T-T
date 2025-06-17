@@ -162,7 +162,7 @@ const getTaskLogs = async (req: Request, res: Response) => {
     }
 };
 
-const deleteLog = async (req: Request, res: Response) => {
+const deleteTimeLog = async (req: Request, res: Response) => {
     try {
         const logId = Number(req.params.logId);
         if (isNaN(logId) || logId <= 0) {
@@ -176,7 +176,7 @@ const deleteLog = async (req: Request, res: Response) => {
 
         res.status(200).json({
             msg: "Log has been deleted successfully",
-            data: deleteLog
+            data: deletedLog
         })
     } catch (error) {
         if (error instanceof Error) {
@@ -247,7 +247,7 @@ export {
     getUserLogs,
     getProjectLogs,
     getTaskLogs,
-    deleteLog,
+    deleteTimeLog,
     updateTimeLog,
     getTotalTimeSpentToday
 }

@@ -32,7 +32,7 @@ export const getUserNotifications = async (req: Request, res: Response) => {
 
     const notifications = await notificationService.getUserNotifications(userId, limit, offset);
     const unreadCount = await notificationService.getUnreadNotificationsCount(userId);
-    console.log("🚀 ~ getUserNotifications ~ unreadCount:", unreadCount)
+    // console.log("🚀 ~ getUserNotifications ~ unreadCount:", unreadCount)
 
     res.status(200).json({
       msg: "Notifications retrieved successfully",

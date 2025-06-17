@@ -2,6 +2,13 @@ import { Request, Response } from "express";
 import { userServices } from "../services/User.service";
 import { LoginSchema, UserCreateSchema, UserUpdateSchema } from "../schemas/User.schema";
 import { db } from "../config/db";
+import { 
+    sendSuccess, 
+    sendNotFound, 
+    sendError, 
+    sendUnauthorized, 
+    sendValidationError 
+} from "../utils/apiResponse";
 
 
 // interface LogoutRequest extends Request {
@@ -24,67 +31,76 @@ const createUser = async (req: Request, res: Response) => {
         const { password, refreshToken, ...safeUser } = user;
         // return // no return will come as typescript types expect Promise<void> and its returning Promise<Response> 
         //  the TypeScript types for Express route handlers expect functions that don't return values explicitly
-        res.status(201).json({
-            msg: "User created successfully",
-            user: safeUser
-        })
+        sendSuccess(res, safeUser, "User created successfully");
     } catch (error) {
         // return 
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({msg: "Internal server error occurred"});
+        sendError(res, error);
     }
 }
 
 const getUserById = async (req: Request, res: Response) => {
     try {
-        const id: number = Number(req.params.id);
-        const user = await userServices.getUserById(id);
-        if(!user){
-            res.status(404).json({ msg: "User Not found!!"})
+        const id = Number(req.params.id);
+        if (isNaN(id) || id <= 0) {
+            sendValidationError(res, "Invalid user id");
+            return;
         }
+
+        const user = await userServices.getUserById(id);
+        if (!user) {
+            sendNotFound(res, "User not found");
+            return;
+        }
+
         const { password, refreshToken, ...safeUser } = user;
 
-        res.status(200).json({
-            user: safeUser,
-            msg: "User fetched successfully"
-        })
+        sendSuccess(res, safeUser, "User fetched successfully");
     } catch (error) {
-        res.status(500).json({msg: "Something went wrong while fetching user"})
+        sendError(res, error);
     }
 }
 
 const updateUser = async (req: Request, res: Response) => {
-
     const id = Number(req.params.id);
-   try {
-     const validateData = UserUpdateSchema.parse(req.body);
-     const updatedUser = await userServices.updateUser(id, validateData);
-     if (!updateUser) {
-         res.status(404).json("User Not Found!!");
-     }
-    //  const { password: _, refreshToken: _, ...safeUser } = updateUser;
+    if (isNaN(id) || id <= 0) {
+        sendValidationError(res, "Invalid user id");
+        return;
+    }
 
-     res.status(200).json({
-         msg: "User updated successfully",
-         updatedUser,
-     })
-   } catch (error) {
-    res.status(500).json({msg : "Something went wrong while updating the user!!"});
-   }
+    try {
+        const validateData = UserUpdateSchema.parse(req.body);
+        const updatedUser = await userServices.updateUser(id, validateData);
+        
+        if (!updatedUser) {
+            sendNotFound(res, "User not found");
+            return;
+        }
+
+        const { password, refreshToken, ...safeUser } = updatedUser;
+        sendSuccess(res, safeUser, "User updated successfully");
+    } catch (error) {
+        sendError(res, error);
+    }
 }
 
 const deleteUser = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-
-    const deletedUser = await userServices.deleteUser(id);
-    if (deletedUser != true) {
-        res.status(400).json({msg: "Deleting failed please try again!!"})
+    if (isNaN(id) || id <= 0) {
+        sendValidationError(res, "Invalid user id");
+        return;
     }
 
-    res.status(200).json({ msg: "User deleted successfully!!"})
+    try {
+        const deletedUser = await userServices.deleteUser(id);
+        if (!deletedUser) {
+            sendError(res, new Error("Failed to delete user"));
+            return;
+        }
+
+        sendSuccess(res, null, "User deleted successfully");
+    } catch (error) {
+        sendError(res, error);
+    }
 }
 
 const login = async (req: Request, res: Response) => {
@@ -95,7 +111,7 @@ const login = async (req: Request, res: Response) => {
     try {
         const user = await userServices.authenticateService(email, password);
         if (!user) {
-            res.status(400).json({ msg: "Invalid email or password!!" });
+            sendUnauthorized(res, "Invalid email or password");
             return;
         }
     
@@ -114,35 +130,40 @@ const login = async (req: Request, res: Response) => {
             .cookie("accessToken", tokens.accessToken, options)
             .cookie("refreshToken", tokens.refreshToken, options)
             .json({
-                msg: "Login successful!!",
-                user: safeUser
+                success: true,
+                message: "Login successful",
+                data: safeUser
             })
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error" });
+        sendError(res, error);
     }
 }
 
-const logout = async(req: /*LogoutRequest*/Request, res: Response) => {
+const logout = async (req: Request, res: Response) => {
     const options = {
         httpOnly: true, 
         secure: true 
-    }
-    if(req.user?.id){
-        await db
-            .updateTable("users")
-            .set({ refreshToken: null })
-            .where('id', '=', req.user.id)
-            .execute();
-    }
+    };
 
-    res.status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
-        .json({ msg: "User logged out successfully!!"})
+    try {
+        if (req.user?.id) {   
+            await db
+                .updateTable("users")
+                .set({ refreshToken: null })
+                .where('id', '=', req.user.id)
+                .execute();
+        }
+
+        res.status(200)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .json({
+                success: true,
+                message: "User logged out successfully"
+            });
+    } catch (error) {
+        sendError(res, error);
+    }
 }
 
 export {

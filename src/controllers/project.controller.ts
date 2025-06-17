@@ -3,6 +3,14 @@ import { projectServices } from "../services/Project.service";
 import { createProjectSchema, updateProjectSchema } from "../schemas/Project.schema";
 import { ZodError } from "zod";
 import { notificationService } from "../services/Notification.service";
+import { 
+    sendSuccess, 
+    sendNotFound, 
+    sendError, 
+    sendUnauthorized, 
+    sendForbidden, 
+    sendValidationError 
+} from "../utils/apiResponse";
 
 // interface ICreateProject extends Request {
 //     user?: {
@@ -12,13 +20,13 @@ import { notificationService } from "../services/Notification.service";
 //     };
 //   }
 
-const createProject = async (req: /*ICreateProject*/Request, res: Response): Promise<void> => {
+const createProject = async (req: Request, res: Response): Promise<void> => {
     try {
         const validatedProject = createProjectSchema.parse(req.body);
         const userId = Number(req.user?.id);
 
         if (!userId) {
-            res.status(401).json({ msg: "Unauthorized, please login first." });
+            sendUnauthorized(res, "Unauthorized, please login first.");
             return;
         }
         // Validate and parse the request body with your schema
@@ -38,27 +46,16 @@ const createProject = async (req: /*ICreateProject*/Request, res: Response): Pro
             await notificationService.notifyTaskCreated(project.id, project, userId);
         }
 
-        res.status(200).json({
-            msg: "Project created successfully!!!",
-            project: project,
-        });
+        sendSuccess(res, project, "Project created successfully");
     } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ errors: error.errors });
-            return;
-        }
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Project creation failed' });
+        sendError(res, error);
     }
 };
 
 const getProjectById = async (req: Request, res: Response) => {
     const projectId = Number(req.params.id);
     if (!projectId) {
-        res.status(400).json({ msg: "Invalid project id" });
+        sendValidationError(res, "Invalid project id");
         return;
     }
     
@@ -66,34 +63,27 @@ const getProjectById = async (req: Request, res: Response) => {
         const project = await projectServices.getProjectById(projectId);
 
         if (!project) {
-            res.status(200).json({ msg: "Project not found!!" });
+            sendNotFound(res, "Project not found");
             return;
         }
 
-        res.status(200).json({
-            msg: "Project found!!",
-            project: project,
-        });
+        sendSuccess(res, project, "Project found");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ error: 'Failed to fetch project' });
+        sendError(res, error);
     }
 };
 
 const updateProject = async (req: Request, res: Response) => {
     const projectId = Number(req.params.id);
     if (isNaN(projectId) || projectId <= 0) {
-        res.status(400).json({ msg: "Invalid project id" });
+        sendValidationError(res, "Invalid project id");
         return;
     }
 
     try {
         const project = await projectServices.getProjectById(projectId);
         if (!project) {
-            res.status(200).json({ msg: "Project not found!" });
+            sendNotFound(res, "Project not found");
             return;
         }
 
@@ -102,7 +92,7 @@ const updateProject = async (req: Request, res: Response) => {
 
         // Check if the user is the owner or has Admin role
         if (project.ownerId !== userId && userRole !== "Admin") {
-            res.status(403).json({ msg: "Forbidden: You cannot update this project." });
+            sendForbidden(res, "You cannot update this project");
             return;
         }
 
@@ -119,7 +109,7 @@ const updateProject = async (req: Request, res: Response) => {
         };
         const updatedProject = await projectServices.updateProject(projectId, updatedData);
         if (!updatedProject) {
-            res.status(200).json({ msg: "Project not found!!" });
+            sendNotFound(res, "Project not found");
             return;
         }
 
@@ -130,27 +120,16 @@ const updateProject = async (req: Request, res: Response) => {
             console.log("Notification sent:", notification);
         }
 
-        res.status(200).json({
-            msg: "Project updated successfully!!",
-            project: updatedProject,
-        });
+        sendSuccess(res, updatedProject, "Project updated successfully");
     } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ errors: error.errors });
-            return;
-        }
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error" });
+        sendError(res, error);
     }
 };
 
 const deleteProject = async (req: Request, res: Response) => {
     const projectId = Number(req.params.id);
     if (isNaN(projectId) || projectId <= 0) {
-        res.status(400).json({ msg: "Invalid project id" });
+        sendValidationError(res, "Invalid project id");
         return;
     }
 
@@ -158,61 +137,46 @@ const deleteProject = async (req: Request, res: Response) => {
         const userId = Number(req.user?.id);
         const userRole = req.user?.role;
         if (!userId) {
-            res.status(401).json({ msg: "Unauthorized, please login first." });
+            sendUnauthorized(res, "Unauthorized, please login first.");
             return;
         }
 
         const project = await projectServices.getProjectById(projectId);
         if (!project) {
-            res.status(200).json({ msg: "Project not found!" });
+            sendNotFound(res, "Project not found");
             return;
         }
 
         // Check if the user is the owner or has Admin role
         if (project.ownerId !== userId && userRole !== "Admin") {
-            res.status(403).json({ msg: "Forbidden: You cannot delete this project." });
+            sendForbidden(res, "You cannot delete this project");
             return;
         }
 
         const deletedProject = await projectServices.deleteProject(projectId);
-
-        res.status(200).json({
-            msg: deletedProject.msg,
-        });
+        sendSuccess(res, deletedProject, deletedProject.msg);
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error" });
+        sendError(res, error);
     }
 };
 
 const getAllProjectsOfAUser = async (req: Request, res: Response): Promise<void> => {
     const userId = Number(req.user?.id);
     if (!userId) {
-        res.status(401).json({ msg: "Unauthorized, please login first." });
+        sendUnauthorized(res, "Unauthorized, please login first.");
         return;
     }
 
     try {
         const allProjects = await projectServices.getAllProjectsOfAUser(userId);
         if (!allProjects || allProjects.length === 0) {
-            res.status(200).json({ status: "success", msg: "No projects found!!" });
+            sendNotFound(res, "No projects found");
             return;
         }
 
-        res.status(200).json({
-            status: "success",
-            msg: "All projects fetched successfully",
-            projects: allProjects
-        });
+        sendSuccess(res, allProjects, "All projects fetched successfully");
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ msg: error.message });
-            return;
-        }
-        res.status(500).json({ msg: "Internal Server Error", error });
+        sendError(res, error);
     }
 };
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
-import { deleteLog, getLogById, getProjectLogs, getTaskLogs, getUserLogs, startTimeLog, stopTimeLog, updateTimeLog, getTotalTimeSpentToday } from "../controllers/logs.controller";
+import { deleteTimeLog, getLogById, getProjectLogs, getTaskLogs, getUserLogs, startTimeLog, stopTimeLog, updateTimeLog, getTotalTimeSpentToday } from "../controllers/logs.controller";
 
 const router = Router();
 
@@ -16,7 +16,7 @@ router.route("/getUserLogs/:userId").get(getUserLogs)
 router.route("/getProjectLogs/:projectId").get(getProjectLogs)
 router.route("/getTaskLogs/:taskId").get(getTaskLogs)
 
-router.route("/deleteLog/:logId").delete(deleteLog)
+router.route("/deleteLog/:logId").delete(deleteTimeLog)
 
 router.route("/updateLog/:logId").patch(updateTimeLog)
 

@@ -2,108 +2,109 @@ import { Request, Response } from "express";
 import { CreateChecklistItemSchema, UpdateChecklistItemSchema } from "../schemas/Task.schema";
 import { taskChecklistServices } from "../services/TaskChecklist.service";
 import { ZodError } from "zod";
+import { 
+    sendSuccess, 
+    sendNotFound, 
+    sendError, 
+    sendValidationError 
+} from "../utils/apiResponse";
 
 const addChecklistItem = async (req: Request, res: Response) => {
     try {
-        const userId = Number(req.user?.id)
         const validated = CreateChecklistItemSchema.parse(req.body);
-        const item = await taskChecklistServices.addTaskChecklistItem(
-          validated.taskId,
-          validated.item,
-          userId,
-        );
-        res.status(201).json({
-            message: "Checklist item added successfully",
-            item
-        });
-    } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ errors: error.errors });
+        const userId = Number(req.user?.id);
+
+        if (isNaN(validated.taskId) || validated.taskId <= 0) {
+            sendValidationError(res, 'Invalid task ID');
+            return;
         }
-        res.status(500).json({ error: 'Failed to add checklist item' });
+
+        if (!validated.item) {
+            sendValidationError(res, 'Item text is required');
+            return;
+        }
+
+        const checklistItem = await taskChecklistServices.addTaskChecklistItem(validated.taskId, validated.item, userId);
+        sendSuccess(res, checklistItem, 'Checklist item created successfully');
+    } catch (error) {
+        sendError(res, error);
     }
-}
+};
 
 const getChecklistItemById = async (req: Request, res: Response) => {
-  try {
-    const itemId = Number(req.params.itemId);
-  
-    const item = await taskChecklistServices.getChecklistItemById(itemId);
-    if(!item){
-      res.status(404).json({ message: "Checklist item not found" });
+    try {
+        const itemId = Number(req.params.itemId);
+        const item = await taskChecklistServices.getChecklistItemById(itemId);
+        if(!item){
+          sendNotFound(res, 'Checklist item not found');
+          return;
+        }
+        sendSuccess(res, item, 'Checklist item retrieved successfully');
+    } catch (error) {
+        sendError(res, error);
     }
-    
-    res.status(200).json({
-      msg: "Checklist item found",
-      item
-    })
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(400).json({ msg: error.message });
-      return;
-  }
-  }
 };
 
 const removeChecklistItem = async (req: Request, res: Response) => {
-  const itemId = Number(req.params.itemId);
+    try {
+        const itemId = Number(req.params.itemId);
 
-  const removedItem = await taskChecklistServices.removeChecklistItem(itemId);
+        if (isNaN(itemId) || itemId <= 0) {
+            sendValidationError(res, 'Invalid checklist item ID');
+            return;
+        }
 
-  res.status(200).json(removedItem.msg)
-  return;
+        const removedItem = await taskChecklistServices.removeChecklistItem(itemId);
+        sendSuccess(res, removedItem.msg, 'Checklist item deleted successfully');
+    } catch (error) {
+        sendError(res, error);
+    }
 };
 
 const updateChecklistItem = async (req: Request, res: Response) => {
+    try {
+        const itemId = Number(req.params.itemId);
+        const userId = Number(req.user?.id);
+        const validatedData = UpdateChecklistItemSchema.parse(req.body);
 
-  //! NOTEEEE: the update will give error that it failed but the update will be done
-  //! it will give error as mysql saves boolean as timyint so ill have to change the logic for that.
-  try {
-    const itemId = Number(req.params.itemId);
-    const userId = Number(req.user?.id);
-  
-    const validatedData = UpdateChecklistItemSchema.parse(req.body);
-    const updatedItem = await taskChecklistServices.updateChecklistItem(itemId, userId, validatedData);
-  
-    if (!updatedItem) {
-      res.status(404).json({ message: "Checklist item not found" });
-    }
 
-     res.status(200).json({
-      message: "Checklist item updated successfully",
-      item: updatedItem
-    });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      res.status(400).json({ errors: error.errors });
-      return;
+        if (isNaN(itemId) || itemId <= 0) {
+            sendValidationError(res, 'Invalid checklist item ID');
+            return;
+        }
+
+        const updatedItem = await taskChecklistServices.updateChecklistItem(itemId, userId, validatedData);
+        if (!updatedItem) {
+            sendNotFound(res, 'Checklist item not found');
+            return;
+        }
+        sendSuccess(res, updatedItem, 'Checklist item updated successfully');
+    } catch (error) {
+        sendError(res, error);
     }
-    if (error instanceof Error) {
-       res.status(400).json({ message: error.message });
-       return;
-    }
-    res.status(500).json({ message: 'Failed to update checklist item' });
-    return;
-  }
 };
 
 const getTaskChecklist = async (req: Request, res: Response) => {
-  try {
-    const checklist = await taskChecklistServices.getTaskChecklist(Number(req.params.taskId));
+    try {
+        const taskId = Number(req.params.taskId);
 
-    res.status(200).json({
-      msg: "Task checklist found",
-      checklist
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch checklist' });
-  }
-}
+        if (isNaN(taskId) || taskId <= 0) {
+            sendValidationError(res, 'Invalid task ID');
+            return;
+        }
+
+        const checklist = await taskChecklistServices.getTaskChecklist(taskId);
+        sendSuccess(res, checklist, 'Task checklist retrieved successfully');
+    } catch (error) {
+        sendError(res, error);
+    }
+};
+
 
 export {
-    addChecklistItem,
-    getChecklistItemById,
-    removeChecklistItem,
-    updateChecklistItem,
-    getTaskChecklist,
+  addChecklistItem,
+  getChecklistItemById,
+  removeChecklistItem,
+  updateChecklistItem,
+  getTaskChecklist,
 }
