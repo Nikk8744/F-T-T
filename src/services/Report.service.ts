@@ -280,17 +280,15 @@ export const ReportService = {
         eb("t.ownerId", "=", userId),
         eb("ta.userId", "=", userId)
       ]));
-      console.log("🚀 ~ getTaskStatusDistribution ~ query:", query)
     }
     
     const statusDistribution = await query
     .groupBy("t.status")
       .execute();
-      console.log("🚀 ~ getTaskStatusDistribution ~ statusDistribution:", statusDistribution)
       
     // Calculate total tasks
     const totalTasks = statusDistribution.reduce((sum, item) => sum + Number(item.count), 0);
-    console.log("🚀 ~ getTaskStatusDistribution ~ totalTasks:", totalTasks)
+    // console.log("🚀 ~ getTaskStatusDistribution ~ totalTasks:", totalTasks)
     
     // Get overdue tasks count
     const now = new Date();

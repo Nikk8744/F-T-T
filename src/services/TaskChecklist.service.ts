@@ -4,12 +4,12 @@ import { db } from "../config/db";
 
 export const taskChecklistServices = {
     async addTaskChecklistItem(taskId: number, item: string, userId: number) {
-
         const task = await db
         .selectFrom('tasks')
         .select('ownerId')
         .where('id', '=', taskId)
         .executeTakeFirstOrThrow();
+        console.log({taskId, item, userId, task});
 
         if (task.ownerId !== userId) {
         throw new Error('Only task owner can add checklist items');

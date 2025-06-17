@@ -10,21 +10,23 @@ import {
 } from "../utils/apiResponse";
 
 const addChecklistItem = async (req: Request, res: Response) => {
+    console.log("addChecklistItem");
     try {
         const validated = CreateChecklistItemSchema.parse(req.body);
         const userId = Number(req.user?.id);
-
+        
         if (isNaN(validated.taskId) || validated.taskId <= 0) {
             sendValidationError(res, 'Invalid task ID');
             return;
         }
-
+        
         if (!validated.item) {
             sendValidationError(res, 'Item text is required');
             return;
         }
-
+        
         const checklistItem = await taskChecklistServices.addTaskChecklistItem(validated.taskId, validated.item, userId);
+        console.log({validated, userId, checklistItem});
         sendSuccess(res, checklistItem, 'Checklist item created successfully');
     } catch (error) {
         sendError(res, error);
