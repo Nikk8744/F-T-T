@@ -1,5 +1,3 @@
-import { Insertable, Updateable, UpdateKeys } from "kysely";
-import { DB } from "../utils/kysely-types";
 import { db } from "../config/db";
 
 export const taskChecklistServices = {

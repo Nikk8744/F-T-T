@@ -32,6 +32,22 @@ const createProject = async (req: Request, res: Response): Promise<void> => {
         // Validate and parse the request body with your schema
         const startDate = new Date(validatedProject.startDate);  // Convert to Date
         const endDate = new Date(validatedProject.endDate);
+        
+        // Check if start date is in the past
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); // Set to beginning of day for fair comparison
+        
+        if (startDate < currentDate) {
+            sendValidationError(res, "Project start date cannot be in the past");
+            return;
+        }
+        
+        // Check if end date is before start date
+        if (endDate < startDate) {
+            sendValidationError(res, "Project end date cannot be before start date");
+            return;
+        }
+        
         const projectData = {
             ...validatedProject,
             ownerId: userId,
@@ -97,6 +113,31 @@ const updateProject = async (req: Request, res: Response) => {
         }
 
         const validatedProject = updateProjectSchema.parse({ ...req.body, id: projectId });
+        
+        // Validate dates if they are being updated
+        if (validatedProject.startDate || validatedProject.endDate) {
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0); // Set to beginning of day for fair comparison
+            
+            const existingStartDate = new Date(project.startDate);
+            const newStartDate = validatedProject.startDate ? new Date(validatedProject.startDate) : existingStartDate;
+            const existingEndDate = new Date(project.endDate);
+            const newEndDate = validatedProject.endDate ? new Date(validatedProject.endDate) : existingEndDate;
+            
+            // Only check if start date is in the past if it's being changed
+            if (validatedProject.startDate && 
+                newStartDate < currentDate && 
+                newStartDate.getTime() !== existingStartDate.getTime()) {
+                sendValidationError(res, "Project start date cannot be in the past");
+                return;
+            }
+            
+            // Check if end date is before start date
+            if (newEndDate < newStartDate) {
+                sendValidationError(res, "Project end date cannot be before start date");
+                return;
+            }
+        }
 
         // Check if status is being updated to 'Completed'
         const isCompletingProject = validatedProject.status === 'Completed' && project.status !== 'Completed';

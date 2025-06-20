@@ -199,7 +199,12 @@ pnpm install
 npm run migrateAll
 ```
 
-5. Start the development server
+5. (Optional) Seed the database with test data
+```bash
+npm run seed
+```
+
+6. Start the development server
 ```bash
 npm run dev
 ```
@@ -227,6 +232,7 @@ DB_NAME=freelance_tt
 - `npm run migrateAll`: Run all database migrations
 - `npm run codegen`: Generate TypeScript types from database schema
 - `npm run check-deadlines`: Manually check task deadlines
+- `npm run seed`: Populate database with test data
 
 ## 🔮 Future Enhancements
 

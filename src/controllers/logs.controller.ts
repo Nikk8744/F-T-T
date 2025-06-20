@@ -194,6 +194,22 @@ const updateTimeLog = async (req: Request, res: Response) => {
 
     try {
         const validatedData = UpdateTimeLogSchema.parse(req.body);
+        
+        // Additional validation for dates
+        if (validatedData.startTime) {
+            const startTime = new Date(validatedData.startTime);
+            const now = new Date();
+            
+            // For time logs, we might want to allow backdating for manual entries
+            // But we should prevent future dates
+            if (startTime > now) {
+                res.status(400).json({ msg: "Start time cannot be in the future" });
+                return;
+            }
+        }
+        
+        // End time validation is already handled by Zod schema refinement
+        
         const updates = {
             ...validatedData,
             startTime: validatedData.startTime ? new Date(validatedData.startTime) : undefined,

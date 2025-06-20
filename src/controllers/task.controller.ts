@@ -20,6 +20,12 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
         const data = req.body;
         const validateData = TaskCreateSchema.parse(data);
         const userId = Number(req.user?.id);
+        
+        // Check if due date is in the past
+        if (validateData.dueDate && new Date(validateData.dueDate) < new Date()) {
+            sendValidationError(res, "Due date cannot be in the past");
+            return;
+        }
     
         // Create the task with the user as owner
         const task = await taskServices.createTask(projectId, validateData, userId);
@@ -100,6 +106,12 @@ const updateTask = async (req: Request, res: Response) => {
     try {
         const validateData = TaskUpdateSchema.parse(req.body);
         const userId = Number(req.user?.id);
+        
+        // Check if due date is in the past
+        if (validateData.dueDate && new Date(validateData.dueDate) < new Date()) {
+            sendValidationError(res, "Due date cannot be in the past");
+            return;
+        }
         
         // Get the task before update to check status changes
         const taskBeforeUpdate = await taskServices.getTaskById(taskId);

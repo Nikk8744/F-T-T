@@ -11,7 +11,8 @@
     "server": "nodemon src/index.ts",
     "migrateAll": "npx kysely-ctl migrate:latest",
     "codegen": "kysely-codegen --dialect mysql --camel-case --out-file  src/utils/kysely-types.ts",
-    "check-deadlines": "ts-node src/jobs/deadlineCheck.ts"
+    "check-deadlines": "ts-node src/jobs/deadlineCheck.ts",
+    "seed": "ts-node src/scripts/seed.ts"
   },
   "keywords": [],
   "author": "",
