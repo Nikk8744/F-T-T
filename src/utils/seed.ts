@@ -78,14 +78,17 @@ export async function seedDatabase() {
             }
         }
 
+        // Get current date (20/06/2025)
+        const currentDate = new Date('2025-06-20');
+        
         // Seed projects
         console.log('Seeding projects...');
         const projects = [
             {
                 name: 'Website Redesign',
                 description: 'Complete redesign of the company website with modern UI/UX',
-                startDate: new Date('2023-11-01'),
-                endDate: new Date('2024-02-28'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // May 15, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 30), // August 30, 2025
                 status: 'In-Progress',
                 ownerId: insertedUsers[0].id,
                 totalHours: 120.5
@@ -93,8 +96,8 @@ export async function seedDatabase() {
             {
                 name: 'Mobile App Development',
                 description: 'Develop a cross-platform mobile app for iOS and Android',
-                startDate: new Date('2023-12-15'),
-                endDate: new Date('2024-04-30'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1), // June 1, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 3, 15), // September 15, 2025
                 status: 'Pending',
                 ownerId: insertedUsers[1].id,
                 totalHours: 85.25
@@ -102,8 +105,8 @@ export async function seedDatabase() {
             {
                 name: 'Database Migration',
                 description: 'Migrate from legacy database to new cloud-based solution',
-                startDate: new Date('2023-10-01'),
-                endDate: new Date('2023-12-31'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 10), // April 10, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // July 10, 2025
                 status: 'Completed',
                 ownerId: insertedUsers[2].id,
                 totalHours: 210.75
@@ -146,8 +149,8 @@ export async function seedDatabase() {
                 subject: 'Design Homepage Mockup',
                 description: 'Create mockups for the new homepage design',
                 status: 'Done',
-                startDate: new Date('2023-11-05'),
-                dueDate: new Date('2023-11-15'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20), // May 20, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 5), // June 5, 2025
                 totalTimeSpent: 28800, // 8 hours in seconds
                 ownerId: insertedUsers[0].id,
                 projectId: insertedProjects[0].id
@@ -156,8 +159,8 @@ export async function seedDatabase() {
                 subject: 'Implement User Authentication',
                 description: 'Set up secure user authentication system',
                 status: 'In-Progress',
-                startDate: new Date('2023-11-16'),
-                dueDate: new Date('2023-11-30'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10), // June 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 25), // June 25, 2025
                 totalTimeSpent: 43200, // 12 hours in seconds
                 ownerId: insertedUsers[1].id,
                 projectId: insertedProjects[0].id
@@ -166,8 +169,8 @@ export async function seedDatabase() {
                 subject: 'Create API Documentation',
                 description: 'Document all API endpoints and usage examples',
                 status: 'Pending',
-                startDate: new Date('2023-12-01'),
-                dueDate: new Date('2023-12-15'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15), // June 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 5), // July 5, 2025
                 totalTimeSpent: 0,
                 ownerId: insertedUsers[2].id,
                 projectId: insertedProjects[0].id
@@ -176,8 +179,8 @@ export async function seedDatabase() {
                 subject: 'Design App UI',
                 description: 'Create UI design for the mobile app',
                 status: 'In-Progress',
-                startDate: new Date('2023-12-20'),
-                dueDate: new Date('2024-01-15'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 5), // June 5, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // July 10, 2025
                 totalTimeSpent: 18000, // 5 hours in seconds
                 ownerId: insertedUsers[1].id,
                 projectId: insertedProjects[1].id
@@ -186,8 +189,8 @@ export async function seedDatabase() {
                 subject: 'Implement Push Notifications',
                 description: 'Set up push notification system for mobile app',
                 status: 'Pending',
-                startDate: new Date('2024-01-16'),
-                dueDate: new Date('2024-02-01'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1), // July 1, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 20), // July 20, 2025
                 totalTimeSpent: 0,
                 ownerId: insertedUsers[2].id,
                 projectId: insertedProjects[1].id
@@ -196,8 +199,8 @@ export async function seedDatabase() {
                 subject: 'Database Schema Design',
                 description: 'Design schema for the new database',
                 status: 'Done',
-                startDate: new Date('2023-10-05'),
-                dueDate: new Date('2023-10-15'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 15), // April 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 5), // May 5, 2025
                 totalTimeSpent: 36000, // 10 hours in seconds
                 ownerId: insertedUsers[2].id,
                 projectId: insertedProjects[2].id
@@ -206,8 +209,8 @@ export async function seedDatabase() {
                 subject: 'Data Migration Script',
                 description: 'Write script to migrate data from old to new database',
                 status: 'Done',
-                startDate: new Date('2023-10-16'),
-                dueDate: new Date('2023-11-15'),
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // May 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10), // June 10, 2025
                 totalTimeSpent: 72000, // 20 hours in seconds
                 ownerId: insertedUsers[3].id,
                 projectId: insertedProjects[2].id
@@ -331,82 +334,112 @@ export async function seedDatabase() {
             {
                 name: 'Homepage Design Work',
                 description: 'Working on homepage mockups',
-                startTime: new Date('2023-11-05T09:00:00'),
-                endTime: new Date('2023-11-05T13:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 25, 9, 0), // May 25, 2025, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 25, 13, 0), // May 25, 2025, 1:00 PM
                 userId: insertedUsers[1].id,
                 projectId: insertedProjects[0].id,
                 taskId: insertedTasks[0].id,
-                timeSpent: 14400 // 4 hours in seconds
+                timeSpent: 14400, // 4 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 25)
             },
             {
                 name: 'Homepage Design Revisions',
                 description: 'Revising homepage mockups based on feedback',
-                startTime: new Date('2023-11-06T14:00:00'),
-                endTime: new Date('2023-11-06T18:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 28, 14, 0), // May 28, 2025, 2:00 PM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 28, 18, 0), // May 28, 2025, 6:00 PM
                 userId: insertedUsers[1].id,
                 projectId: insertedProjects[0].id,
                 taskId: insertedTasks[0].id,
-                timeSpent: 14400 // 4 hours in seconds
+                timeSpent: 14400, // 4 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 28)
             },
             {
                 name: 'Auth Research',
                 description: 'Researching authentication libraries',
-                startTime: new Date('2023-11-16T10:00:00'),
-                endTime: new Date('2023-11-16T15:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12, 10, 0), // June 12, 2025, 10:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12, 15, 0), // June 12, 2025, 3:00 PM
                 userId: insertedUsers[1].id,
                 projectId: insertedProjects[0].id,
                 taskId: insertedTasks[1].id,
-                timeSpent: 18000 // 5 hours in seconds
+                timeSpent: 18000, // 5 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12)
             },
             {
                 name: 'Auth Implementation',
                 description: 'Implementing user authentication',
-                startTime: new Date('2023-11-17T09:00:00'),
-                endTime: new Date('2023-11-17T16:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15, 9, 0), // June 15, 2025, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15, 16, 0), // June 15, 2025, 4:00 PM
                 userId: insertedUsers[3].id,
                 projectId: insertedProjects[0].id,
                 taskId: insertedTasks[1].id,
-                timeSpent: 25200 // 7 hours in seconds
+                timeSpent: 25200, // 7 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15)
             },
             {
                 name: 'App UI Design',
                 description: 'Designing mobile app UI',
-                startTime: new Date('2023-12-20T08:00:00'),
-                endTime: new Date('2023-12-20T13:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 8, 0), // June 8, 2025, 8:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8, 13, 0), // June 8, 2025, 1:00 PM
                 userId: insertedUsers[0].id,
                 projectId: insertedProjects[1].id,
                 taskId: insertedTasks[3].id,
-                timeSpent: 18000 // 5 hours in seconds
+                timeSpent: 18000, // 5 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8)
             },
             {
                 name: 'Database Schema Design',
                 description: 'Designing database schema',
-                startTime: new Date('2023-10-05T09:00:00'),
-                endTime: new Date('2023-10-05T19:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 20, 9, 0), // April 20, 2025, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 20, 19, 0), // April 20, 2025, 7:00 PM
                 userId: insertedUsers[2].id,
                 projectId: insertedProjects[2].id,
                 taskId: insertedTasks[5].id,
-                timeSpent: 36000 // 10 hours in seconds
+                timeSpent: 36000, // 10 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 20)
             },
             {
                 name: 'Migration Script - Day 1',
                 description: 'Writing data migration scripts',
-                startTime: new Date('2023-10-16T08:00:00'),
-                endTime: new Date('2023-10-16T16:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15, 8, 0), // May 15, 2025, 8:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15, 16, 0), // May 15, 2025, 4:00 PM
                 userId: insertedUsers[3].id,
                 projectId: insertedProjects[2].id,
                 taskId: insertedTasks[6].id,
-                timeSpent: 28800 // 8 hours in seconds
+                timeSpent: 28800, // 8 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15)
             },
             {
                 name: 'Migration Script - Day 2',
                 description: 'Testing and optimizing migration scripts',
-                startTime: new Date('2023-10-17T09:00:00'),
-                endTime: new Date('2023-10-17T21:00:00'),
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 16, 9, 0), // May 16, 2025, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 16, 21, 0), // May 16, 2025, 9:00 PM
                 userId: insertedUsers[3].id,
                 projectId: insertedProjects[2].id,
                 taskId: insertedTasks[6].id,
-                timeSpent: 43200 // 12 hours in seconds
+                timeSpent: 43200, // 12 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 16)
+            },
+            {
+                name: 'Recent Work Session',
+                description: 'Working on current tasks',
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1, 9, 0), // Yesterday, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1, 17, 0), // Yesterday, 5:00 PM
+                userId: insertedUsers[1].id,
+                projectId: insertedProjects[0].id,
+                taskId: insertedTasks[1].id,
+                timeSpent: 28800, // 8 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1) // Yesterday
+            },
+            {
+                name: 'Today Morning Session',
+                description: 'Working on current sprint tasks',
+                startTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 9, 0), // Today, 9:00 AM
+                endTime: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 12, 30), // Today, 12:30 PM
+                userId: insertedUsers[2].id,
+                projectId: insertedProjects[1].id,
+                taskId: insertedTasks[3].id,
+                timeSpent: 12600, // 3.5 hours in seconds
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
             }
         ];
 
@@ -425,7 +458,8 @@ export async function seedDatabase() {
                 entityType: 'TASK',
                 entityId: insertedTasks[0].id,
                 initiatorId: insertedUsers[0].id,
-                isRead: true
+                isRead: true,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20) // May 20, 2025
             },
             {
                 userId: insertedUsers[2].id,
@@ -435,7 +469,8 @@ export async function seedDatabase() {
                 entityType: 'TASK',
                 entityId: insertedTasks[0].id,
                 initiatorId: insertedUsers[0].id,
-                isRead: false
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20) // May 20, 2025
             },
             {
                 userId: insertedUsers[0].id,
@@ -445,7 +480,8 @@ export async function seedDatabase() {
                 entityType: 'TASK',
                 entityId: insertedTasks[0].id,
                 initiatorId: insertedUsers[1].id,
-                isRead: false
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), 5) // June 5, 2025
             },
             {
                 userId: insertedUsers[2].id,
@@ -455,7 +491,8 @@ export async function seedDatabase() {
                 entityType: 'PROJECT',
                 entityId: insertedProjects[0].id,
                 initiatorId: insertedUsers[0].id,
-                isRead: true
+                isRead: true,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15) // May 15, 2025
             },
             {
                 userId: insertedUsers[0].id,
@@ -465,7 +502,41 @@ export async function seedDatabase() {
                 entityType: 'TASK',
                 entityId: insertedTasks[1].id,
                 initiatorId: insertedUsers[1].id,
-                isRead: false
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15) // June 15, 2025
+            },
+            {
+                userId: insertedUsers[1].id,
+                type: 'TASK_DEADLINE_APPROACHING',
+                title: 'Task Deadline Approaching',
+                message: 'The task "Implement User Authentication" is due in 5 days',
+                entityType: 'TASK',
+                entityId: insertedTasks[1].id,
+                initiatorId: null,
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1) // Yesterday
+            },
+            {
+                userId: insertedUsers[3].id,
+                type: 'TASK_DEADLINE_APPROACHING',
+                title: 'Task Deadline Approaching',
+                message: 'The task "Implement User Authentication" is due in 5 days',
+                entityType: 'TASK',
+                entityId: insertedTasks[1].id,
+                initiatorId: null,
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1) // Yesterday
+            },
+            {
+                userId: insertedUsers[4].id,
+                type: 'TASK_ASSIGNED',
+                title: 'New Task Assignment',
+                message: 'You have been assigned to "Design App UI"',
+                entityType: 'TASK',
+                entityId: insertedTasks[3].id,
+                initiatorId: insertedUsers[1].id,
+                isRead: false,
+                createdAt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()) // Today
             }
         ];
 
@@ -475,7 +546,7 @@ export async function seedDatabase() {
 
         // Seed notification preferences
         console.log('Seeding notification preferences...');
-        const notificationTypes = ['TASK_ASSIGNED', 'TASK_COMPLETED', 'TASK_UPDATED', 'PROJECT_MEMBER_ADDED', 'PROJECT_COMPLETED'];
+        const notificationTypes = ['TASK_ASSIGNED', 'TASK_COMPLETED', 'TASK_UPDATED', 'PROJECT_MEMBER_ADDED', 'PROJECT_COMPLETED', 'TASK_DEADLINE_APPROACHING'];
 
         for (const user of insertedUsers) {
             for (const type of notificationTypes) {

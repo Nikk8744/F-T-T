@@ -1,14 +1,10 @@
 import { db } from "../config/db"
+import { checkIsProjectOwner, checkIsProjectMember, checkProjectAccess } from "../utils/projectUtils";
 
 export const projectMemberServices = {
     async addMembersToProject(projectId: number, currentUser: number, userIdToAdd: number) {
-        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
-        if (!project) {
-            throw new Error("Project not found");
-        }
-
-        const ownerId = project.ownerId ? Number(project.ownerId) : undefined;
-        if (ownerId !== currentUser) {
+        const isOwner = await checkIsProjectOwner(projectId, currentUser);
+        if (!isOwner) {
             throw new Error("Forbidden: only the project owner can add members");
         }
 
@@ -18,13 +14,14 @@ export const projectMemberServices = {
             throw new Error(`User ${userIdToAdd} is already a member of project ${projectId}`);
         }
         await db.insertInto("projectmembers").values({ projectId, userId: userIdToAdd }).executeTakeFirstOrThrow();
-        return { msg: "Member added successfully", ownerId: ownerId.toString() };
+        return { msg: "Member added successfully" };
     },
 
-    async removeMembersFromProject(projectId: number,/*currentUser: number,*/ userId: number) {
-        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
-        if (!project) {
-            throw new Error("Project not found");
+    async removeMembersFromProject(projectId: number, currentUser: number, userId: number) {
+        // Check if project exists and user is the owner
+        const isOwner = await checkIsProjectOwner(projectId, currentUser);
+        if (!isOwner) {
+            throw new Error("Forbidden: only the project owner can remove members");
         }
 
         // const ownerId = project.userId ? Number(project.userId) : undefined; 
@@ -42,25 +39,16 @@ export const projectMemberServices = {
     },
 
     async getAllMembersOfAProject(projectId: number, currentUser: number) {
-        const project = await db.selectFrom("projects").select(["id", "ownerId"]).where('id', '=', projectId).executeTakeFirst();
+        // Check if project exists
+        const project = await db.selectFrom("projects").select(["id"]).where('id', '=', projectId).executeTakeFirst();
         if (!project) {
             throw new Error("Project not found");
         }
 
-        // Check if user is either the owner or a member
-        const isOwner = project.ownerId === currentUser;
-        if (!isOwner) {
-            // If not owner, check if user is a member
-            const isMember = await db
-                .selectFrom("projectmembers")
-                .select("userId")
-                .where("projectId", "=", projectId)
-                .where("userId", "=", currentUser)
-                .executeTakeFirst();
-
-            if (!isMember) {
-                throw new Error("Forbidden: You must be a project member to view team members");
-            }
+        // Check if user has access to the project
+        const hasAccess = await checkProjectAccess(projectId, currentUser);
+        if (!hasAccess) {
+            throw new Error("Forbidden: You must be a project member to view team members");
         }
 
         // now here we want to get all the members of projects i.e users, so we want to combine 2 tables users and projectmembers we need to perform inner join

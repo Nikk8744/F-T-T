@@ -1,23 +1,14 @@
 import { sql } from "kysely";
 import { db } from "../config/db";
+import { projectServices } from "./Project.service";
+import { checkIsProjectOwner, checkProjectAccess } from "../utils/projectUtils";
 
 export const ReportService = {
 
   // Project Report Functions
 
   async verifyProjectAccess(projectId: number, userId: number) {
-    const projectAccess = await db
-      .selectFrom("projects")
-      .innerJoin("projectmembers", "projectmembers.projectId", "projects.id")
-      // .where("projects.id", "=", projectId)
-      .where((eb) => eb.or([
-        eb("projectmembers.userId", "=", userId),
-        eb("projects.ownerId", "=", userId)
-      ]))
-      .select(["projects.id", "projects.ownerId"])
-      .executeTakeFirst();
-
-    return !!projectAccess;
+    return checkProjectAccess(projectId, userId);
   },
 
   async getProjectSummary(projectId: number, userId: number) {
@@ -241,20 +232,11 @@ export const ReportService = {
     // If projectId is provided, check if user is the project owner
     let isProjectOwner = false;
     if (projectId) {
-      const project = await db
-        .selectFrom("projects")
-        .select(["ownerId"])
-        .where("id", "=", projectId)
-        .executeTakeFirst();
-        
-      if (!project) {
-        throw new Error("Project not found");
-      }
-      
-      isProjectOwner = project.ownerId === userId;
+      // Use our utility function to check project ownership
+      isProjectOwner = await checkIsProjectOwner(projectId, userId);
       
       // Also verify the user has access to this project
-      const hasAccess = await this.verifyProjectAccess(projectId, userId);
+      const hasAccess = await checkProjectAccess(projectId, userId);
       if (!hasAccess) {
         throw new Error("Access denied to project");
       }
@@ -614,8 +596,8 @@ export const ReportService = {
     const projectSummaries = [];
     
     for (const project of projects) {
-      // Check if user is the project owner
-      const isProjectOwner = project.ownerId === userId;
+      // Check if user is the project owner using our utility function
+      const isProjectOwner = await checkIsProjectOwner(project.id, userId);
       
       // Task query base - different filtering based on user role
       let taskStatsQuery = db

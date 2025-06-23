@@ -16,6 +16,8 @@ import {
 
 const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log("createTask")
+
         const projectId = Number(req.params.projectId)
         const data = req.body;
         const validateData = TaskCreateSchema.parse(data);
@@ -29,6 +31,7 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
     
         // Create the task with the user as owner
         const task = await taskServices.createTask(projectId, validateData, userId);
+        console.log("🚀 ~ createTask ~ task:", task)
         
         if(!task) {
             sendNotFound(res, "Task not created");
@@ -79,6 +82,8 @@ const getTask = async (req: Request, res: Response) => {
 
 const deleteTask = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
+    const userId = Number(req.user?.id);
+    
     if (isNaN(taskId) || taskId <= 0) {
         sendValidationError(res, "Invalid task id");
         return;
@@ -86,6 +91,7 @@ const deleteTask = async (req: Request, res: Response) => {
 
     try {
         const deletedTask = await taskServices.deleteTask(taskId);
+        // const deletedTask = await taskServices.deleteTask(taskId, userId);
         if(!deletedTask) {
             sendNotFound(res, "Task not found");
             return;
@@ -98,6 +104,8 @@ const deleteTask = async (req: Request, res: Response) => {
 
 const updateTask = async (req: Request, res: Response) => {
     const taskId = Number(req.params.taskId);
+    const userId = Number(req.user?.id);
+    
     if (isNaN(taskId) || taskId <= 0) {
         sendValidationError(res, "Invalid task id");
         return;
@@ -105,7 +113,6 @@ const updateTask = async (req: Request, res: Response) => {
 
     try {
         const validateData = TaskUpdateSchema.parse(req.body);
-        const userId = Number(req.user?.id);
         
         // Check if due date is in the past
         if (validateData.dueDate && new Date(validateData.dueDate) < new Date()) {
@@ -121,7 +128,7 @@ const updateTask = async (req: Request, res: Response) => {
         }
         
         // Update the task basic info
-        const updatedTask = await taskServices.updateTask(taskId, validateData);
+        const updatedTask = await taskServices.updateTask(taskId, validateData, userId);
         if(!updatedTask) {
             sendNotFound(res, "Task not found");
             return;
@@ -173,6 +180,8 @@ const updateTask = async (req: Request, res: Response) => {
 const getProjectTasks = async (req: Request, res: Response) => {
     try {
         const projectId = Number(req.params.projectId);
+        // const userId = Number(req.user?.id);
+        
         if (isNaN(projectId) || projectId <= 0) {
             sendValidationError(res, "Invalid project id");
             return;

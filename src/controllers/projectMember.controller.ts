@@ -43,14 +43,14 @@ const addMemberToProject = async (req: Request, res: Response) => {
 
 const removeMember = async (req: Request, res: Response): Promise<void> => {
     const { projectId, userId } = req.body;
-    const ownerId = Number(req.user?.id);
-    if (!ownerId) {
+    const currentUser = Number(req.user?.id);
+    if (!currentUser) {
         sendUnauthorized(res, 'Unauthorized');
         return;
     }
 
     try {
-        const result = await projectMemberServices.removeMembersFromProject(projectId, userId);
+        const result = await projectMemberServices.removeMembersFromProject(projectId, currentUser, userId);
         if (!result) {
             sendNotFound(res, 'Failed to remove member from project');
             return;
