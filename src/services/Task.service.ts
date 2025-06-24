@@ -3,9 +3,10 @@ import { DB } from "../utils/kysely-types";
 import { db } from "../config/db";
 import { projectServices } from "./Project.service";
 import { checkIsProjectMember, checkIsProjectOwner, checkProjectAccess } from "../utils/projectUtils";
+import { taskChecklistServices } from "./TaskChecklist.service";
 
 export const taskServices = {
-    async createTask(projectId: number, task: Omit<Insertable<DB['tasks']>, 'projectId' | 'ownerId'>, userId: number) {
+    async createTask(projectId: number, task: Omit<Insertable<DB['tasks']>, 'projectId' | 'ownerId'> & { checklistItems?: (string | { item: string, isCompleted?: boolean })[] }, userId: number) {
         console.log("🚀 ~ createTask ~ projectId:", projectId)
         console.log("🚀 ~ createTask ~ task:", task)
         console.log("🚀 ~ createTask ~ userId:", userId)
@@ -16,10 +17,53 @@ export const taskServices = {
             throw new Error('User is not authorized to create tasks in this project');
         }
 
-        const fullTask = { ...task, projectId, ownerId: userId }
-
-        const newTask = await db.insertInto("tasks").values(fullTask).executeTakeFirstOrThrow();
-        return db.selectFrom("tasks").selectAll().where('id', '=', Number(newTask.insertId)).executeTakeFirstOrThrow();
+        // Extract checklist items before creating the task
+        const { checklistItems, ...taskData } = task;
+        
+        // Create the task
+        const fullTask = { ...taskData, projectId, ownerId: userId };
+        
+        // Use a transaction to ensure all operations succeed or fail together
+        return await db.transaction().execute(async (trx) => {
+            // Create the task
+            const newTask = await trx.insertInto("tasks")
+                .values(fullTask)
+                .executeTakeFirstOrThrow();
+                
+            const taskId = Number(newTask.insertId);
+            
+            // Create checklist items if provided
+            if (checklistItems && checklistItems.length > 0) {
+                for (const item of checklistItems) {
+                    // Handle both string and object formats
+                    if (typeof item === 'string') {
+                        // If item is a string, create with default isCompleted=false
+                        await trx.insertInto("taskchecklists")
+                            .values({
+                                taskId,
+                                item: item,
+                                isCompleted: false
+                            })
+                            .execute();
+                    } else {
+                        // If item is an object, use its properties
+                        await trx.insertInto("taskchecklists")
+                            .values({
+                                taskId,
+                                item: item.item,
+                                isCompleted: item.isCompleted || false
+                            })
+                            .execute();
+                    }
+                }
+            }
+            
+            // Return the complete task with its data
+            return trx.selectFrom("tasks")
+                .selectAll()
+                .where('id', '=', taskId)
+                .executeTakeFirstOrThrow();
+        });
     },
 
     async getTaskById(taskId: number) {

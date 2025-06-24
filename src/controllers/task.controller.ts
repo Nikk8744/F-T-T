@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { projectServices } from "../services/Project.service";
 import { taskAssignmentServices } from "../services/TaskAssignment.service";
 import { notificationService } from "../services/Notification.service";
+import { taskChecklistServices } from "../services/TaskChecklist.service";
 import { 
     sendSuccess, 
     sendNotFound, 
@@ -16,7 +17,8 @@ import {
 
 const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.log("createTask")
+        console.log("createTask🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀")
+        console.log("🚀 ~ createTask ~ req.body:", req.body)
 
         const projectId = Number(req.params.projectId)
         const data = req.body;
@@ -29,7 +31,7 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
             return;
         }
     
-        // Create the task with the user as owner
+        // Create the task with the user as owner (now includes checklist items)
         const task = await taskServices.createTask(projectId, validateData, userId);
         console.log("🚀 ~ createTask ~ task:", task)
         
@@ -51,10 +53,16 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
         // Send notifications
         await notificationService.notifyTaskCreated(task.id, task, userId);
         
-        // Get the task with all its details
-        const taskWithDetails = await taskServices.getTaskById(task.id); 
+        // Get the task with all its details including checklist items
+        const taskWithDetails = await taskServices.getTaskById(task.id);
+        const checklistItems = await taskChecklistServices.getTaskChecklist(task.id);
         
-        sendSuccess(res, taskWithDetails, "Task created successfully");
+        // Include checklist items in the response
+        const responseData = {
+            ...taskWithDetails,
+            checklistItems
+        };        
+        sendSuccess(res, responseData, "Task created successfully");
     } catch (error) {
         sendError(res, error);
     }

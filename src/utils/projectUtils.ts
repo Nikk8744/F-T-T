@@ -1,10 +1,9 @@
 import { db } from "../config/db";
 
 export const checkIsProjectOwner = async (projectId: number, userId: number): Promise<boolean> => {
-    if (!projectId || !userId) {
+    if (projectId == null || userId == null || projectId < 0 || userId < 0) {
         return false;
-    }
-    
+    }    
     const project = await db
         .selectFrom("projects")
         .where("id", "=", projectId)
