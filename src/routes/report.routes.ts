@@ -25,7 +25,7 @@ router.use(verifyJWT);
 // Project report routes
 router.get('/project/:projectId/summary', getProjectSummary);
 router.get('/project/:projectId/team', getProjectTeamReport);
-router.get('/project/:projectId/risk', getProjectRiskReport);
+router.get('/project/:projectId/risks', getProjectRiskReport);
 router.get('/project/:projectId/tasks', getProjectTaskBreakdown);
 router.get('/project/:projectId/timeline', getProjectTimelineReport);
 router.get('/project/:projectId/pdf', downloadProjectReportPdf);
@@ -39,6 +39,6 @@ router.get('/tasks/pdf', downloadTaskReportPdf);
 
 // Dashboard summary routes
 router.get('/project/summary/all', getAllProjectsSummary);
-router.get('/project/pdf/all', downloadAllProjectsReportPdf);
+router.get('/project/summary/all/pdf', downloadAllProjectsReportPdf);
 
 export default router;
