@@ -159,6 +159,10 @@ const updateProject = async (req: Request, res: Response) => {
             console.log("Project completed notification sent");
             const notification = await notificationService.notifyProjectCompleted(projectId, updatedProject, userId);
             console.log("Notification sent:", notification);
+            
+            // Add completedAt field info in the success message
+            sendSuccess(res, updatedProject, "Project marked as complete and completion date recorded");
+            return;
         }
 
         sendSuccess(res, updatedProject, "Project updated successfully");

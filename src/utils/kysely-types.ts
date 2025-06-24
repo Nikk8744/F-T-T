@@ -46,6 +46,7 @@ export interface Projects {
   status: Generated<string | null>;
   totalHours: Generated<Decimal | null>;
   updatedAt: Generated<Date>;
+  completedAt: Date | null;
 }
 
 export interface TaskAssignments {
@@ -78,6 +79,8 @@ export interface Tasks {
   subject: string;
   totalTimeSpent: Generated<number | null>;
   updatedAt: Generated<Date>;
+  completedAt: Date | null;
+  priority: Generated<string | null>;
 }
 
 export interface Timelogs {

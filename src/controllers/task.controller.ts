@@ -171,15 +171,19 @@ const updateTask = async (req: Request, res: Response) => {
         // Check if task was marked as completed
         if (validateData.status === 'Done' && taskBeforeUpdate.status !== 'Done') {
             await notificationService.notifyTaskCompleted(taskId, updatedTask, userId);
+            
+            // Add completedAt field info in the success message
+            const taskWithDetails = await taskServices.getTaskById(taskId);
+            sendSuccess(res, taskWithDetails, "Task marked as complete and completion date recorded");
+            return;
         } else {
             // Otherwise, just notify about the update
             await notificationService.notifyTaskUpdated(taskId, updatedTask, userId);
+            
+            // Get the task with updated details
+            const taskWithDetails = await taskServices.getTaskById(taskId);
+            sendSuccess(res, taskWithDetails, "Task updated successfully");
         }
-        
-        // Get the task with updated details
-        const taskWithDetails = await taskServices.getTaskById(taskId);
-    
-        sendSuccess(res, taskWithDetails, "Task updated successfully");
     } catch (error) {
         sendError(res, error);
     }

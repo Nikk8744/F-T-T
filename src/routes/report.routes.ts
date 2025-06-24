@@ -1,44 +1,44 @@
 // src/routes/report.routes.ts
-import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware";
-import {
-  downloadAllProjectsReportPdf,
-  downloadProjectReportPdf,
-  downloadTaskReportPdf,
-  getAllProjectsSummary,
-  getOverdueTasksReport,
-  getProjectRiskReport,
-  getProjectSummary,
-  getProjectTaskBreakdown,
-  getProjectTeamReport,
-  getProjectTimelineReport,
-  getTaskCompletionTrendReport,
-  getTaskStatusReport,
-  //   getTaskPriorityReport,
-} from "../controllers/report.controller";
+import express from 'express';
+import { verifyJWT } from '../middlewares/auth.middleware';
+import { 
+    getProjectSummary, 
+    getProjectTeamReport, 
+    getProjectRiskReport, 
+    getProjectTaskBreakdown,
+    downloadProjectReportPdf,
+    getProjectTimelineReport,
+    getTaskStatusReport,
+    getOverdueTasksReport,
+    getTaskPriorityReport,
+    downloadTaskReportPdf,
+    getTaskCompletionTrendReport,
+    getAllProjectsSummary,
+    downloadAllProjectsReportPdf
+} from '../controllers/report.controller';
 
-// Create router
-const router = Router();
+const router = express.Router();
 
-// Apply auth middleware to all routes
+// All report routes require authentication
 router.use(verifyJWT);
 
 // Project report routes
-router.route("/project/:projectId/summary").get(getProjectSummary);
-router.route("/project/:projectId/team").get(getProjectTeamReport);
-router.route("/project/:projectId/risks").get(getProjectRiskReport);
-router.route("/project/:projectId/pdf").get(downloadProjectReportPdf); // left
-router.route("/project/:projectId/tasks").get(getProjectTaskBreakdown);
-router.route("/project/:projectId/timeline").get(getProjectTimelineReport);
-router.route("/project/summary/all").get(getAllProjectsSummary);
-router.route("/project/summary/all/pdf").get(downloadAllProjectsReportPdf);
-
+router.get('/project/:projectId/summary', getProjectSummary);
+router.get('/project/:projectId/team', getProjectTeamReport);
+router.get('/project/:projectId/risk', getProjectRiskReport);
+router.get('/project/:projectId/tasks', getProjectTaskBreakdown);
+router.get('/project/:projectId/timeline', getProjectTimelineReport);
+router.get('/project/:projectId/pdf', downloadProjectReportPdf);
 
 // Task report routes
-router.route("/tasks/status").get(getTaskStatusReport);
-router.route("/tasks/overdue").get(getOverdueTasksReport);
-// router.route("/tasks/priority").get(getTaskPriorityReport);
-router.route("/tasks/pdf").get(downloadTaskReportPdf);
-router.route("/tasks/completion-trend").get(getTaskCompletionTrendReport);
+router.get('/tasks/status', getTaskStatusReport);
+router.get('/tasks/overdue', getOverdueTasksReport);
+router.get('/tasks/priority', getTaskPriorityReport);
+router.get('/tasks/completion-trend', getTaskCompletionTrendReport);
+router.get('/tasks/pdf', downloadTaskReportPdf);
+
+// Dashboard summary routes
+router.get('/project/summary/all', getAllProjectsSummary);
+router.get('/project/pdf/all', downloadAllProjectsReportPdf);
 
 export default router;

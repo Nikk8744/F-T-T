@@ -98,6 +98,16 @@ export const taskServices = {
         if (!hasAccess) {
             throw new Error('User is not authorized to update this task');
         }
+        
+        // Check if status is being updated to 'Done'
+        if (updates.status === 'Done' && existingTask.status !== 'Done') {
+            updates.completedAt = new Date();
+        }
+        
+        // If status is changed from 'Done' to something else, clear completedAt
+        if (updates.status && updates.status !== 'Done' && existingTask.status === 'Done') {
+            updates.completedAt = null;
+        }
 
         await db.updateTable("tasks").set(updates).where('id', '=', taskId).executeTakeFirstOrThrow();
 

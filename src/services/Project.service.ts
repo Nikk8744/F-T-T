@@ -31,6 +31,16 @@ export const projectServices = {
         if (!existingProject) {
             throw new Error(`Project with id ${id} does not exist`);
         }
+        
+        // Check if status is being updated to 'Completed'
+        if (updates.status === 'Completed' && existingProject.status !== 'Completed') {
+            updates.completedAt = new Date();
+        }
+        
+        // If status is changed from 'Completed' to something else, clear completedAt
+        if (updates.status && updates.status !== 'Completed' && existingProject.status === 'Completed') {
+            updates.completedAt = null;
+        }
 
         await db.updateTable("projects")
                 .set(updates)

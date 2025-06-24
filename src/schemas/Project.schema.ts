@@ -16,6 +16,7 @@ export const createProjectSchema = z.object({
     // }),
     status: z.enum(['Pending', 'In-Progress', 'Completed']).default('Pending'),
     totalHours: z.number().default(0),
+    completedAt: z.string().datetime().transform((val) => new Date(val)).optional().nullable(),
 })
 
 export const updateProjectSchema = z.object({
@@ -43,5 +44,10 @@ export const updateProjectSchema = z.object({
       .optional(),
     totalHours: z.number()
       .nonnegative("Total hours cannot be negative")
+      .optional(),
+    completedAt: z.string()
+      .datetime({ message: "Invalid ISO date format" })
+      .transform((val) => new Date(val))
       .optional()
+      .nullable(),
   });

@@ -46,12 +46,24 @@ export const ReportService = {
       .where("projectId", "=", projectId)
       .executeTakeFirstOrThrow();
 
+    // Get completed tasks with completedAt date
+    const completedTasksWithDate = await db
+      .selectFrom("tasks")
+      .select(["id", "subject", "completedAt"])
+      .where("projectId", "=", projectId)
+      .where("status", "=", "Done")
+      .where("completedAt", "is not", null)
+      .orderBy("completedAt", "desc")
+      .limit(5)
+      .execute();
+
     return {
       project,
       taskStats,
       completionPercentage,
       membersCount: Number(membersCount.count),
-      totalTasks
+      totalTasks,
+      recentlyCompleted: completedTasksWithDate
     };
   },
 
@@ -115,7 +127,7 @@ export const ReportService = {
     // Get overdue tasks
     const overdueTasks = await db
       .selectFrom("tasks")
-      .select(["id", "subject", "dueDate", "status", "ownerId"])
+      .select(["id", "subject", "dueDate", "status", "ownerId", "priority", "completedAt"])
       .where("projectId", "=", projectId)
       .where("dueDate", "<", now)
       .where("status", "!=", "Done")
@@ -128,7 +140,7 @@ export const ReportService = {
 
     const approachingDeadlines = await db
       .selectFrom("tasks")
-      .select(["id", "subject", "dueDate", "status", "ownerId"])
+      .select(["id", "subject", "dueDate", "status", "ownerId", "priority"])
       .where("projectId", "=", projectId)
       .where("dueDate", ">=", now)
       .where("dueDate", "<=", nextWeek)
@@ -136,11 +148,24 @@ export const ReportService = {
       .orderBy("dueDate", "asc")
       .execute();
 
+    // Get high priority tasks
+    const highPriorityTasks = await db
+      .selectFrom("tasks")
+      .select(["id", "subject", "dueDate", "status", "ownerId", "priority", "completedAt"])
+      .where("projectId", "=", projectId)
+      .where("priority", "in", ["High", "Urgent"])
+      .where("status", "!=", "Done")
+      .orderBy("priority", "desc")
+      .orderBy("dueDate", "asc")
+      .execute();
+
     return {
       overdueTasks,
       approachingDeadlines,
+      highPriorityTasks,
       overdueCount: overdueTasks.length,
-      approachingCount: approachingDeadlines.length
+      approachingCount: approachingDeadlines.length,
+      highPriorityCount: highPriorityTasks.length
     };
   },
 
@@ -163,19 +188,19 @@ export const ReportService = {
       .execute();
 
     // Get tasks by priority
-    // const tasksByPriority = await db
-    //   .selectFrom("tasks")
-    //   .select([
-    //     "priority",
-    //     (eb) => eb.fn.count<number>("id").as("count")
-    //   ])
-    //   .where("projectId", "=", projectId)
-    //   .groupBy("priority")
-    //   .execute();
+    const tasksByPriority = await db
+      .selectFrom("tasks")
+      .select([
+        "priority",
+        (eb) => eb.fn.count<number>("id").as("count")
+      ])
+      .where("projectId", "=", projectId)
+      .groupBy("priority")
+      .execute();
 
     return {
       tasksByStatus,
-      // tasksByPriority
+      tasksByPriority
     };
   },
 
@@ -188,14 +213,14 @@ export const ReportService = {
 
     const project = await db
       .selectFrom("projects")
-      .select(["id", "name", "startDate", "endDate", "status"])
+      .select(["id", "name", "startDate", "endDate", "status", "completedAt"])
       .where("id", "=", projectId)
       .executeTakeFirstOrThrow();
 
     // Get upcoming milestones (tasks with due dates)
     const upcomingTasks = await db
       .selectFrom("tasks")
-      .select(["id", "subject", "dueDate", "status"])
+      .select(["id", "subject", "dueDate", "status", "priority", "completedAt"])
       .where("projectId", "=", projectId)
       .where("dueDate", "is not", null)
       .orderBy("dueDate", "asc")
@@ -302,13 +327,14 @@ export const ReportService = {
     nextWeek.setDate(now.getDate() + 7);
     
     let approachingQuery = db
-      .selectFrom("tasks as t")
-      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
-      .select((eb) => eb.fn.count<number>("t.id").as("count"))
-      .where("t.dueDate", ">=", now)
-      .where("t.dueDate", "<=", nextWeek)
-      .where("t.status", "!=", "Done");
+    .selectFrom("tasks as t")
+    .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+    .select((eb) => eb.fn.count<number>("t.id").as("count"))
+    .where("t.dueDate", ">=", now)
+    .where("t.dueDate", "<=", nextWeek)
+    .where("t.status", "!=", "Done");
     
+    console.log("🚀 ~ getTaskStatusDistribution ~ approachingQuery:", approachingQuery)
     // Apply project filter if provided
     if (projectId) {
       approachingQuery = approachingQuery.where("t.projectId", "=", projectId);
@@ -344,10 +370,12 @@ export const ReportService = {
         "t.id",
         "t.subject",
         "t.updatedAt",
-        "t.projectId"
+        "t.completedAt",
+        "t.projectId",
+        "t.priority"
       ])
       .where("t.status", "=", "Done")
-      .orderBy("t.updatedAt", "desc")
+      .orderBy("t.completedAt", "desc")
       .limit(5);
     
     // Apply project filter if provided
@@ -365,6 +393,54 @@ export const ReportService = {
     
     const recentCompleted = await recentCompletedQuery.execute();
     
+    // We'll calculate completion time statistics in the application code instead of SQL
+    // This is more compatible across different database systems
+    const completedTasksWithDates = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select([
+        "t.startDate", 
+        "t.completedAt"
+      ])
+      .where("t.status", "=", "Done")
+      .where("t.completedAt", "is not", null)
+      .where("t.startDate", "is not", null);
+    
+    // Apply project filter if provided
+    if (projectId) {
+      completedTasksWithDates.where("t.projectId", "=", projectId);
+    }
+    
+    // If no project specified OR user is not the project owner, only show tasks they own or are assigned to
+    if (!projectId || !isProjectOwner) {
+      completedTasksWithDates.where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]));
+    }
+    
+    const tasksWithDates = await completedTasksWithDates.execute();
+    
+    // Calculate average completion days in JavaScript
+    let totalDays = 0;
+    let taskCount = 0;
+    
+    tasksWithDates.forEach(task => {
+      if (task.startDate && task.completedAt) {
+        const startDate = new Date(task.startDate);
+        const completedDate = new Date(task.completedAt);
+        const diffTime = completedDate.getTime() - startDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays >= 0) {
+          totalDays += diffDays;
+          taskCount++;
+        }
+      }
+    });
+    
+    const avgCompletionDays = taskCount > 0 ? Math.round(totalDays / taskCount) : null;
+    
     return {
       distribution: statusWithPercentage,
       totalTasks,
@@ -373,6 +449,7 @@ export const ReportService = {
       overdueCount,
       approachingCount,
       recentCompleted,
+      avgCompletionDays,
       // Add a flag to indicate if these are partial stats (user only sees their own tasks)
       partialStats: projectId ? !isProjectOwner : true
     };
@@ -391,7 +468,7 @@ export const ReportService = {
         "t.subject",
         "t.dueDate",
         "t.status",
-        // "t.priority",
+        "t.priority",
         "p.name as projectName",
         "p.id as projectId"
       ])
@@ -427,56 +504,55 @@ export const ReportService = {
     });
   },
 
-  //   async getTaskPriorityAnalysis(userId: number, projectId?: number) {
-  //   // Base query for tasks by priority
-  //   let query = db
-  //     .selectFrom("tasks as t")
-  //     .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
-  //     .select([
-  //       "t.priority",
-  //       "t.status",
-  //       (eb) => eb.fn.count<number>("t.id").as("count")
-  //     ])
-  //     .where(eb => eb.or([
-  //       eb("t.ownerId", "=", userId),
-  //       eb("ta.userId", "=", userId)
-  //     ]))
-  //     .groupBy(["t.priority", "t.status"]);
+  async getTaskPriorityAnalysis(userId: number, projectId?: number) {
+    // Base query for tasks by priority
+    let query = db
+      .selectFrom("tasks as t")
+      .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+      .select([
+        "t.priority",
+        "t.status",
+        (eb) => eb.fn.count<number>("t.id").as("count")
+      ])
+      .where(eb => eb.or([
+        eb("t.ownerId", "=", userId),
+        eb("ta.userId", "=", userId)
+      ]))
+      .groupBy(["t.priority", "t.status"]);
 
-  //   // Add project filter if provided
-  //   if (projectId) {
-  //     const hasAccess = await this.verifyProjectAccess(projectId, userId);
-  //     if (!hasAccess) {
-  //       throw new Error("Access denied to project");
-  //     }
-  //     query = query.where("t.projectId", "=", projectId);
-  //   }
+    // Add project filter if provided
+    if (projectId) {
+      const hasAccess = await this.verifyProjectAccess(projectId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied to project");
+      }
+      query = query.where("t.projectId", "=", projectId);
+    }
 
-  //   const result = await query.execute();
+    const result = await query.execute();
 
-  //   // Transform to better structure for reporting
-  //   const priorityMap: Record<string, { total: number, completed: number }> = {};
+    // Transform to better structure for reporting
+    const priorityMap: Record<string, { total: number, completed: number }> = {};
 
-  //   result.forEach(item => {
-  //     const priority = item.priority || 'Unset';
+    result.forEach(item => {
+      const priority = item.priority || 'Medium';
 
-  //     if (!priorityMap[priority]) {
-  //       priorityMap[priority] = { total: 0, completed: 0 };
-  //     }
+      if (!priorityMap[priority]) {
+        priorityMap[priority] = { total: 0, completed: 0 };
+      }
 
-  //     priorityMap[priority].total += Number(item.count);
-  //     if (item.status === 'Done') {
-  //       priorityMap[priority].completed += Number(item.count);
-  //     }
-  //   });
+      priorityMap[priority].total += Number(item.count);
+      if (item.status === 'Done') {
+        priorityMap[priority].completed += Number(item.count);
+      }
+    });
 
-  //   return Object.entries(priorityMap).map(([priority, stats]) => ({
-  //     priority,
-  //     ...stats,
-  //     completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
-  //   }));
-  // },
-
+    return Object.entries(priorityMap).map(([priority, stats]) => ({
+      priority,
+      ...stats,
+      completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
+    }));
+  },
 
   async getTaskCompletionTrend(userId: number, days: number = 30, projectId?: number) {
     const endDate = new Date(new Date().setDate(new Date().getDate() + 1));
@@ -583,7 +659,8 @@ export const ReportService = {
         "p.startDate",
         "p.endDate",
         "p.ownerId",
-        "p.description"
+        "p.description",
+        "p.completedAt"
       ])
       .where(eb => eb.or([
         eb("p.ownerId", "=", userId),
@@ -670,6 +747,25 @@ export const ReportService = {
         }
         
         const approachingDeadlines = await approachingDeadlinesQuery.executeTakeFirst();
+
+        // Get high priority tasks count
+        let highPriorityTasksQuery = db
+          .selectFrom("tasks as t")
+          .leftJoin("task_assignments as ta", "ta.taskId", "t.id")
+          .select((eb) => eb.fn.count<number>("t.id").as("count"))
+          .where("t.projectId", "=", project.id)
+          .where("t.priority", "in", ["High", "Urgent"])
+          .where("t.status", "!=", "Done");
+          
+        // If user is not the project owner, only show tasks they own or are assigned to
+        if (!isProjectOwner) {
+          highPriorityTasksQuery = highPriorityTasksQuery.where(eb => eb.or([
+            eb("t.ownerId", "=", userId),
+            eb("ta.userId", "=", userId)
+          ]));
+        }
+        
+        const highPriorityTasks = await highPriorityTasksQuery.executeTakeFirst();
           
         // Get team members count
         const teamMembers = await db
@@ -685,11 +781,13 @@ export const ReportService = {
           status: project.status,
           startDate: project.startDate,
           endDate: project.endDate,
+          completedAt: project.completedAt,
           completionPercentage,
           totalTasks,
           completedTasks: Number(completedTasks),
           overdueTasks: Number(overdueTasks?.count || 0),
           approachingDeadlines: Number(approachingDeadlines?.count || 0),
+          highPriorityTasks: Number(highPriorityTasks?.count || 0),
           teamMembers: Number(teamMembers?.count || 0) + 1, // +1 for owner
           isOwner: isProjectOwner,
           // Add a flag to indicate if these are partial stats (user only sees their own tasks)
@@ -704,6 +802,7 @@ export const ReportService = {
     const completedTasks = projectSummaries.reduce((sum, p) => sum + p.completedTasks, 0);
     const overdueTasks = projectSummaries.reduce((sum, p) => sum + p.overdueTasks, 0);
     const approachingDeadlines = projectSummaries.reduce((sum, p) => sum + p.approachingDeadlines, 0);
+    const highPriorityTasks = projectSummaries.reduce((sum, p) => sum + (p.highPriorityTasks || 0), 0);
     
     return {
       summary: {
@@ -714,7 +813,8 @@ export const ReportService = {
         completedTasks,
         taskCompletionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
         overdueTasks,
-        approachingDeadlines
+        approachingDeadlines,
+        highPriorityTasks
       },
       projects: projectSummaries
     };

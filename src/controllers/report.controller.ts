@@ -86,7 +86,19 @@ export const downloadProjectReportPdf = async (req: Request, res: Response) => {
             return;
         }
         
-        const reportData = await ReportService.getProjectSummary(projectId, userId);
+        // Get project summary data
+        const summaryData = await ReportService.getProjectSummary(projectId, userId);
+        
+        // Get task breakdown by priority
+        const taskBreakdown = await ReportService.getProjectTaskBreakdown(projectId, userId);
+        
+        // Combine data for the report
+        const reportData = {
+            ...summaryData,
+            tasksByPriority: taskBreakdown.tasksByPriority,
+            generatedAt: new Date().toISOString()
+        };
+        
         pdfGenerator.generateProjectReport(reportData, res);
     } catch (error) {
         if (!res.headersSent) {
@@ -137,26 +149,17 @@ export const getOverdueTasksReport = async (req: Request, res: Response) => {
     }
 };
 
-
-
-// export const getTaskPriorityReport = async (req: Request, res: Response) => {
-//   try {
-//     const userId = Number(req.user?.id);
-//     const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
+export const getTaskPriorityReport = async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.user?.id);
+    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
     
-//     const reportData = await ReportService.getTaskPriorityAnalysis(userId, projectId);
-    
-//     return res.status(200).json({
-//       msg: 'Task priority report generated successfully',
-//       data: reportData
-//     });
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       return res.status(400).json({ msg: error.message });
-//     }
-//     return res.status(500).json({ error: 'Failed to generate task priority report' });
-//   }
-// };
+    const reportData = await ReportService.getTaskPriorityAnalysis(userId, projectId);
+    sendSuccess(res, reportData, 'Task priority report generated successfully');
+  } catch (error) {
+    sendError(res, error);
+  }
+};
 
 export const downloadTaskReportPdf = async (req: Request, res: Response) => {
     try {
@@ -164,13 +167,20 @@ export const downloadTaskReportPdf = async (req: Request, res: Response) => {
         const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
         
         const statusDistribution = await ReportService.getTaskStatusDistribution(userId, projectId);
-        // const priorityAnalysis = await ReportService.getTaskPriorityAnalysis(userId, projectId);
+        const priorityAnalysis = await ReportService.getTaskPriorityAnalysis(userId, projectId);
         const overdueTasks = await ReportService.getOverdueTasks(userId, projectId);
+        
+        // Get completion time statistics
+        let completionTimeTitle = projectId ? 
+            'Task Completion Times for this Project' : 
+            'Your Task Completion Times';
         
         const reportData = {
             statusDistribution,
-            // priorityAnalysis,
-            overdueTasks
+            priorityAnalysis,
+            overdueTasks,
+            completionTimeTitle,
+            generatedAt: new Date().toISOString()
         };
         
         const title = projectId ? 'Project Task Report' : 'All Tasks Report';

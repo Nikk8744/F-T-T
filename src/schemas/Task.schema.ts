@@ -20,6 +20,8 @@ export const TaskCreateSchema = z.object({
   // projectId: z.number().int().positive(),
   ownerId: z.number().int().positive().optional(),
   checklistItems: z.array(ChecklistItemSchema).optional(),
+  priority: z.enum(['Low', 'Medium', 'High', 'Urgent']).default('Medium'),
+  completedAt: z.string().datetime().transform((val) => new Date(val)).optional().nullable(),
 });
 
 export const TaskUpdateSchema = TaskCreateSchema.partial().extend({
