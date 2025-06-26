@@ -159,7 +159,7 @@ export const getUserAssignedTasks = async (req: Request, res: Response) => {
       return;
     }
     const tasks = await taskAssignmentServices.getUserAssignedTasks(userId);
-    sendSuccess(res, tasks, 'User assigned tasks retrieved successfully');
+    sendSuccess(res, tasks, 'User assigned tasks retrieved successfully (excluding tasks created by the user)');
   } catch (error) {
     sendError(res, error);
   }

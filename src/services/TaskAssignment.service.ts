@@ -83,8 +83,12 @@ export const taskAssignmentServices = {
           "tasks.totalTimeSpent",
           "tasks.projectId",
           "tasks.ownerId",
+          "tasks.priority",
+          "tasks.completedAt",
+          "tasks.createdAt",
         ])
         .where("task_assignments.userId", "=", userId)
+        .where("tasks.ownerId", "!=", userId)
         .execute();
     } catch (error) {
       console.error("Error getting user assigned tasks:", error);
