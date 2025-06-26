@@ -27,7 +27,7 @@ declare global {
 
 // Setup middleware first
 app.use(cors({
-    origin: `${process.env.FRONTEND_URL}`,
+    origin: process.env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -45,17 +45,6 @@ global.io = io;
 app.get("/", (req, res) => {
     res.send("Hello broo")
 });
-
-app.use(cors({
-    origin: `${process.env.FRONTEND_URL}`,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['Set-Cookie']
-}));
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
 
 // import routes
 import userRoutes from './routes/user.routes';

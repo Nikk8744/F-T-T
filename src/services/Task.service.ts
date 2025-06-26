@@ -3,13 +3,16 @@ import { DB } from "../utils/kysely-types";
 import { db } from "../config/db";
 import { projectServices } from "./Project.service";
 import { checkIsProjectMember, checkIsProjectOwner, checkProjectAccess } from "../utils/projectUtils";
-import { taskChecklistServices } from "./TaskChecklist.service";
+import { TaskStatus } from "../types";
+
+interface CreateTaskParams {
+    projectId: number;
+    task: Omit<Insertable<DB['tasks']>, 'projectId' | 'ownerId'> & { checklistItems?: (string | { item: string, isCompleted?: boolean })[] };
+    userId: number;
+}
 
 export const taskServices = {
-    async createTask(projectId: number, task: Omit<Insertable<DB['tasks']>, 'projectId' | 'ownerId'> & { checklistItems?: (string | { item: string, isCompleted?: boolean })[] }, userId: number) {
-        console.log("🚀 ~ createTask ~ projectId:", projectId)
-        console.log("🚀 ~ createTask ~ task:", task)
-        console.log("🚀 ~ createTask ~ userId:", userId)
+    async createTask({ projectId, task, userId }: CreateTaskParams) {
         
         // Check if user has access to the project (either owner or member)
         const hasAccess = await checkProjectAccess(projectId, userId);
@@ -100,12 +103,12 @@ export const taskServices = {
         }
         
         // Check if status is being updated to 'Done'
-        if (updates.status === 'Done' && existingTask.status !== 'Done') {
+        if (updates.status === TaskStatus.DONE && existingTask.status !== TaskStatus.DONE) {
             updates.completedAt = new Date();
         }
         
         // If status is changed from 'Done' to something else, clear completedAt
-        if (updates.status && updates.status !== 'Done' && existingTask.status === 'Done') {
+        if (updates.status && updates.status !== TaskStatus.DONE && existingTask.status === TaskStatus.DONE) {
             updates.completedAt = null;
         }
 

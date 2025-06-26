@@ -121,6 +121,7 @@ const login = async (req: Request, res: Response) => {
             secure: true, // this makes sure ke cookie is sent form secure https 
             sameSite: 'None' as 'none',
             path: '/',
+            domain: '.onrender.com',
             maxAge: 24 * 60 * 60 * 1000,
         }
     

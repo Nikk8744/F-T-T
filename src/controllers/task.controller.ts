@@ -17,8 +17,6 @@ import {
 
 const createTask = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.log("createTask🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀")
-        console.log("🚀 ~ createTask ~ req.body:", req.body)
 
         const projectId = Number(req.params.projectId)
         const data = req.body;
@@ -32,8 +30,7 @@ const createTask = async (req: Request, res: Response): Promise<void> => {
         }
     
         // Create the task with the user as owner (now includes checklist items)
-        const task = await taskServices.createTask(projectId, validateData, userId);
-        console.log("🚀 ~ createTask ~ task:", task)
+        const task = await taskServices.createTask({ projectId, task: validateData, userId });
         
         if(!task) {
             sendNotFound(res, "Task not created");
