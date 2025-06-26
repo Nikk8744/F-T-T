@@ -114,17 +114,19 @@ const login = async (req: Request, res: Response) => {
             sendUnauthorized(res, "Invalid email or password");
             return;
         }
-    
+        
         const tokens = await userServices.generateAuthTokens(user)
         const options = {
             httpOnly: true, // this prevents frontend from accessing cookie
             secure: true, // this makes sure ke cookie is sent form secure https 
             sameSite: 'None' as 'none',
             path: '/',
-            domain: '.onrender.com',
+            // domain: '.onrender.com',
             maxAge: 24 * 60 * 60 * 1000,
         }
-    
+        
+        console.log("🚀 ~ login ~ tokens:", tokens)
+        console.log("🚀 ~ login ~ options:", options)
         const { password: _, refreshToken: __, ...safeUser } = user;
     
         res.status(200)

@@ -10,6 +10,10 @@ import { initializeScheduledJobs } from './crons/scheduler';
 const app = express();
 const server = http.createServer(app);
 
+// It tells Express to trust the 'X-Forwarded-Proto' header
+// from the Render reverse proxy. '1' means it will trust the first hop.
+app.set('trust proxy', 1);
+
 const PORT = parseInt(process.env.PORT || '5000', 10);
 // Make io available globally
 declare global {
@@ -24,6 +28,7 @@ declare global {
         }
     }
 }
+
 
 // Setup middleware first
 app.use(cors({
