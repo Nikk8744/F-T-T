@@ -113,6 +113,7 @@ export interface DB {
   projectmembers: Projectmembers;
   projects: Projects;
   task_assignments: TaskAssignments;
+  task_followers: TaskFollowers;
   taskchecklists: Taskchecklists;
   tasks: Tasks;
   timelogs: Timelogs;

@@ -166,138 +166,104 @@ export const getUserAssignedTasks = async (req: Request, res: Response) => {
 };
 
 // Task follower controllers
-// export const addTaskFollower = async (req: Request, res: Response) => {
-//   try {
-//     const { taskId, userId } = TaskUserParamsSchema.parse({
-//       taskId: req.params.taskId,
-//       userId: req.params.userId
-//     });
+export const addTaskFollower = async (req: Request, res: Response) => {
+  try {
+    const { taskId, userId } = TaskUserParamsSchema.parse({
+      taskId: req.params.taskId,
+      userId: req.params.userId
+    });
 
-//     const result = await taskAssignmentServices.addTaskFollower(
-//       Number(taskId),
-//       Number(userId)
-//     );
+    const result = await taskAssignmentServices.addTaskFollower(
+      Number(taskId),
+      Number(userId)
+    );
 
-//     res.status(200).json({
-//       msg: "User added as task follower successfully",
-//       data: result
-//     });
-//   } catch (error) {
-//     if (error instanceof z.ZodError) {
-//       res.status(400).json({ errors: error.errors });
-//       return;
-//     }
-//     if (error instanceof Error) {
-//       res.status(400).json({ msg: error.message });
-//       return;
-//     }
-//     res.status(500).json({ error: "Failed to add task follower" });
-//   }
-// };
+    sendSuccess(res, result, 'User added as task follower successfully');
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
+      return;
+    }
+    sendError(res, error);
+  }
+};
 
-// export const removeTaskFollower = async (req: Request, res: Response) => {
-//   try {
-//     const { taskId, userId } = TaskUserParamsSchema.parse({
-//       taskId: req.params.taskId,
-//       userId: req.params.userId
-//     });
+export const removeTaskFollower = async (req: Request, res: Response) => {
+  try {
+    const { taskId, userId } = TaskUserParamsSchema.parse({
+      taskId: req.params.taskId,
+      userId: req.params.userId
+    });
 
-//     await taskAssignmentServices.removeTaskFollower(
-//       Number(taskId),
-//       Number(userId)
-//     );
+    await taskAssignmentServices.removeTaskFollower(
+      Number(taskId),
+      Number(userId)
+    );
 
-//     res.status(200).json({
-//       msg: "User removed as task follower successfully"
-//     });
-//   } catch (error) {
-//     if (error instanceof z.ZodError) {
-//       res.status(400).json({ errors: error.errors });
-//       return;
-//     }
-//     if (error instanceof Error) {
-//       res.status(400).json({ msg: error.message });
-//       return;
-//     }
-//     res.status(500).json({ error: "Failed to remove task follower" });
-//   }
-// };
+    sendSuccess(res, null, 'User removed as task follower successfully');
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
+      return;
+    }
+    sendError(res, error);
+  }
+};
 
-// export const bulkAddTaskFollowers = async (req: Request, res: Response) => {
-//   try {
-//     const taskId = Number(req.params.taskId);
-//     if (isNaN(taskId) || taskId <= 0) {
-//       res.status(400).json({ msg: "Invalid task ID" });
-//       return;
-//     }
+export const bulkAddTaskFollowers = async (req: Request, res: Response) => {
+  try {
+    const taskId = Number(req.params.taskId);
+    if (isNaN(taskId) || taskId <= 0) {
+      sendValidationError(res, 'Invalid task ID');
+      return;
+    }
 
-//     const { userIds } = UserIdsSchema.parse(req.body);
+    const { userIds } = UserIdsSchema.parse(req.body);
     
-//     const results = [];
-//     for (const userId of userIds) {
-//       const result = await taskAssignmentServices.addTaskFollower(taskId, userId);
-//       results.push(result);
-//     }
+    const results = [];
+    for (const userId of userIds) {
+      const result = await taskAssignmentServices.addTaskFollower(taskId, userId);
+      results.push(result);
+    }
 
-//     res.status(200).json({
-//       msg: "Users added as task followers successfully",
-//       data: results
-//     });
-//   } catch (error) {
-//     if (error instanceof z.ZodError) {
-//       res.status(400).json({ errors: error.errors });
-//       return;
-//     }
-//     if (error instanceof Error) {
-//       res.status(400).json({ msg: error.message });
-//       return;
-//     }
-//     res.status(500).json({ error: "Failed to add task followers" });
-//   }
-// };
+    sendSuccess(res, results, 'Users added as task followers successfully');
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      sendValidationError(res, error.errors.map(e => e.message).join(', '));
+      return;
+    }
+    sendError(res, error);
+  }
+};
 
-// export const getTaskFollowers = async (req: Request, res: Response) => {
-//   try {
-//     const taskId = Number(req.params.taskId);
-//     if (isNaN(taskId) || taskId <= 0) {
-//       res.status(400).json({ msg: "Invalid task ID" });
-//       return;
-//     }
+export const getTaskFollowers = async (req: Request, res: Response) => {
+  try {
+    const taskId = Number(req.params.taskId);
+    if (isNaN(taskId) || taskId <= 0) {
+      sendValidationError(res, 'Invalid task ID');
+      return;
+    }
 
-//     const followers = await taskAssignmentServices.getTaskFollowers(taskId);
+    const followers = await taskAssignmentServices.getTaskFollowers(taskId);
 
-//     res.status(200).json({
-//       msg: "Task followers retrieved successfully",
-//       data: followers
-//     });
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       res.status(400).json({ msg: error.message });
-//       return;
-//     }
-//     res.status(500).json({ error: "Failed to get task followers" });
-//   }
-// };
+    sendSuccess(res, followers, 'Task followers retrieved successfully');
+  } catch (error) {
+    sendError(res, error);
+  }
+};
 
-// export const getUserFollowedTasks = async (req: Request, res: Response) => {
-//   try {
-//     const userId = Number(req.params.userId);
-//     if (isNaN(userId) || userId <= 0) {
-//       res.status(400).json({ msg: "Invalid user ID" });
-//       return;
-//     }
+export const getUserFollowedTasks = async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.userId);
+    if (isNaN(userId) || userId <= 0) {
+      sendValidationError(res, 'Invalid user ID');
+      return;
+    }
 
-//     const tasks = await taskAssignmentServices.getUserFollowedTasks(userId);
+    const tasks = await taskAssignmentServices.getUserFollowedTasks(userId);
 
-//     res.status(200).json({
-//       msg: "User followed tasks retrieved successfully",
-//       data: tasks
-//     });
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       res.status(400).json({ msg: error.message });
-//       return;
-//     }
-//     res.status(500).json({ error: "Failed to get user followed tasks" });
-//   }
-// }; 
+    sendSuccess(res, tasks, 'User followed tasks retrieved successfully');
+  } catch (error) {
+    sendError(res, error);
+  }
+}; 
