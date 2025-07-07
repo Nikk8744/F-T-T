@@ -119,7 +119,7 @@ const login = async (req: Request, res: Response) => {
         const options = {
             httpOnly: true, // this prevents frontend from accessing cookie
             secure: true, // this makes sure cookie is sent over secure https only
-            sameSite: 'none' as 'none', // required for cross-site cookies
+            sameSite: 'None' as 'none', // required for cross-site cookies
             path: '/',
             domain: process.env.COOKIE_DOMAIN || undefined, // set in .env for production
             maxAge: 24 * 60 * 60 * 1000,
@@ -146,7 +146,7 @@ const logout = async (req: Request, res: Response) => {
     const options = {
         httpOnly: true, 
         secure: true,
-        sameSite: 'none' as 'none',
+        sameSite: 'None' as 'none',
         // path: '/',
         // domain: process.env.COOKIE_DOMAIN || undefined,
     };
