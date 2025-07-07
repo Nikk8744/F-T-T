@@ -38,6 +38,13 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     // exposedHeaders: ['Set-Cookie'] // 'Set-Cookie' cannot be exposed due to browser security restrictions
 }));
+
+// Add explicit header controls for cross-site cookies
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));

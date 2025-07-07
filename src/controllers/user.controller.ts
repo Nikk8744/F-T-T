@@ -121,7 +121,7 @@ const login = async (req: Request, res: Response) => {
             secure: true, // this makes sure cookie is sent over secure https only
             sameSite: 'None' as 'none', // required for cross-site cookies
             path: '/',
-            domain: process.env.COOKIE_DOMAIN || undefined, // set in .env for production
+            // domain: process.env.COOKIE_DOMAIN || undefined, // set in .env for production
             maxAge: 24 * 60 * 60 * 1000,
         }
         
