@@ -146,7 +146,7 @@ const logout = async (req: Request, res: Response) => {
     const options = {
         httpOnly: true, 
         secure: true,
-        sameSite: 'None' as 'none',
+        // sameSite: 'None' as 'none',
         // path: '/',
         // domain: process.env.COOKIE_DOMAIN || undefined,
     };
