@@ -118,10 +118,10 @@ const login = async (req: Request, res: Response) => {
         const tokens = await userServices.generateAuthTokens(user)
         const options = {
             httpOnly: true, // this prevents frontend from accessing cookie
-            secure: true, // this makes sure ke cookie is sent form secure https 
-            sameSite: 'None' as 'none',
+            secure: true, // this makes sure cookie is sent over secure https only
+            sameSite: 'none' as 'none', // required for cross-site cookies
             path: '/',
-            // domain: '.onrender.com',
+            domain: process.env.COOKIE_DOMAIN || undefined, // set in .env for production
             maxAge: 24 * 60 * 60 * 1000,
         }
         
@@ -145,7 +145,10 @@ const login = async (req: Request, res: Response) => {
 const logout = async (req: Request, res: Response) => {
     const options = {
         httpOnly: true, 
-        secure: true 
+        secure: true,
+        sameSite: 'none' as 'none',
+        // path: '/',
+        // domain: process.env.COOKIE_DOMAIN || undefined,
     };
 
     try {

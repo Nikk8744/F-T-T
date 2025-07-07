@@ -36,7 +36,7 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['Set-Cookie']
+    // exposedHeaders: ['Set-Cookie'] // 'Set-Cookie' cannot be exposed due to browser security restrictions
 }));
 app.use(express.json());
 app.use(cookieParser());
