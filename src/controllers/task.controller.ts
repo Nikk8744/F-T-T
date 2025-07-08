@@ -78,6 +78,15 @@ const getTask = async (req: Request, res: Response) => {
             sendNotFound(res, "Task not found");
             return;
         }
+        
+        // Get checklist items for the task if needed
+        // const checklistItems = await taskChecklistServices.getTaskChecklist(taskId);
+        
+        // Include checklist items in the response if needed
+        // const responseData = {
+        //     ...task,
+        //     checklistItems
+        // };
     
         sendSuccess(res, task, "Task retrieved successfully");
     } catch (error) {

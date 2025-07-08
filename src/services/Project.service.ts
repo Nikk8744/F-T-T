@@ -21,7 +21,26 @@ export const projectServices = {
     },
 
     async getProjectById(id: number) {
-        const result = await db.selectFrom("projects").selectAll().where('id', '=', id).executeTakeFirst();
+        const result = await db
+            .selectFrom("projects")
+            .leftJoin("users", "users.id", "projects.ownerId")
+            .select([
+                "projects.id",
+                "projects.name",
+                "projects.description",
+                "projects.startDate",
+                "projects.endDate",
+                "projects.ownerId",
+                "projects.status",
+                "projects.totalHours",
+                "projects.createdAt",
+                "projects.updatedAt",
+                "projects.completedAt",
+                "users.name as ownerName",
+                "users.email as ownerEmail"
+            ])
+            .where("projects.id", "=", id)
+            .executeTakeFirst();
         return result;
     },
 
@@ -61,8 +80,28 @@ export const projectServices = {
         return {msg: "Project deleted successfully"};
     },
 
-    async getAllProjectsOfAUser (userId: number) {
-        const allProjectsOfUser =  db.selectFrom('projects').selectAll().where('ownerId', '=', userId).execute();
+    async getAllProjectsOfAUser(userId: number) {
+        const allProjectsOfUser = await db
+            .selectFrom("projects")
+            .leftJoin("users", "users.id", "projects.ownerId")
+            .select([
+                "projects.id",
+                "projects.name",
+                "projects.description",
+                "projects.startDate",
+                "projects.endDate",
+                "projects.ownerId",
+                "projects.status",
+                "projects.totalHours",
+                "projects.createdAt",
+                "projects.updatedAt",
+                "projects.completedAt",
+                "users.name as ownerName",
+                "users.email as ownerEmail"
+            ])
+            .where("projects.ownerId", "=", userId)
+            .orderBy("projects.createdAt", "desc")
+            .execute();
         return allProjectsOfUser;
     }
 }

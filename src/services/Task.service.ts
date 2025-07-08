@@ -70,7 +70,29 @@ export const taskServices = {
     },
 
     async getTaskById(taskId: number) {
-        return db.selectFrom('tasks').selectAll().where('id', "=", taskId).executeTakeFirst();
+        // We'll use the separate query approach since it works reliably
+        const result = await db.selectFrom('tasks')
+        .leftJoin('users', 'users.id', 'tasks.ownerId')
+        .select([
+            'tasks.id as id',
+            'tasks.subject as subject',
+            'tasks.description as description',
+            'tasks.status as status',
+            'tasks.priority as priority',
+            'tasks.dueDate as dueDate',
+            'tasks.projectId as projectId',
+            'tasks.ownerId as ownerId',
+            'tasks.createdAt as createdAt',
+            'tasks.updatedAt as updatedAt',
+            'tasks.completedAt as completedAt',
+            'tasks.totalTimeSpent as totalTimeSpent',
+            'users.name as ownerName',
+            'users.email as ownerEmail'
+        ])
+        .where('tasks.id', "=", taskId)
+        .executeTakeFirst();
+        
+        return result;
     },
 
     // async deleteTask(taskId: number, userId: number) {
@@ -125,16 +147,103 @@ export const taskServices = {
         };
 
         const tasks = await db.selectFrom("tasks").selectAll().where('tasks.projectId', "=", projectId).execute();
+        // if (tasks.length === 0) {
+            //     return [];
+        // }
+        
+        // // Extract unique owner IDs
+        // const ownerIds = [...new Set(tasks.map(task => task.ownerId))];
+        
+        // // Fetch all owners in a single query
+        // const owners = await db.selectFrom('users')
+        //     .where('id', 'in', ownerIds)
+        //     .select(['id', 'name', 'email'])
+        //     .execute();
+            
+        // // Create a map of owner details by ID for quick lookup
+        // const ownerMap = new Map();
+        // owners.forEach(owner => {
+        //     ownerMap.set(owner.id, {
+        //         ownerName: owner.name,
+        //         ownerEmail: owner.email
+        //     });
+        // });
+        
+        // // Combine tasks with their owner details
+        // const tasksWithOwnerDetails = tasks.map(task => {
+        //     const ownerDetails = ownerMap.get(task.ownerId) || { ownerName: null, ownerEmail: null };
+        //     return {
+        //         ...task,
+        //         ...ownerDetails
+        //     };
+        // });
+        
+        // return tasksWithOwnerDetails;
         return tasks;
     },
 
     async getAllTasks() {
         const tasks = await db.selectFrom("tasks").selectAll().execute();
         return tasks;
+            // if (tasks.length === 0) {
+            //     return [];
+            // }
+            
+            // // Extract unique owner IDs
+            // const ownerIds = [...new Set(tasks.map(task => task.ownerId))];
+            
+            // // Fetch all owners in a single query
+            // const owners = await db.selectFrom('users')
+            //     .where('id', 'in', ownerIds)
+            //     .select(['id', 'name', 'email'])
+            //     .execute();
+                
+            // // Create a map of owner details by ID for quick lookup
+            // const ownerMap = new Map();
+            // owners.forEach(owner => {
+            //     ownerMap.set(owner.id, {
+            //         ownerName: owner.name,
+            //         ownerEmail: owner.email
+            //     });
+            // });
+            
+            // // Combine tasks with their owner details
+            // const tasksWithOwnerDetails = tasks.map(task => {
+            //     const ownerDetails = ownerMap.get(task.ownerId) || { ownerName: null, ownerEmail: null };
+            //     return {
+            //         ...task,
+            //         ...ownerDetails
+            //     };
+            // });
+            
+            // return tasksWithOwnerDetails;
     },
 
     async getUserTasks(userId: number) {
         return db.selectFrom('tasks').where('ownerId', '=', userId).selectAll().execute();
+        // const tasks = await db.selectFrom('tasks').where('ownerId', '=', userId).selectAll().execute();
+        
+        // if (tasks.length === 0) {
+        //     return [];
+        // }
+        
+        // // For user tasks, we know all tasks have the same owner (the user)
+        // // So we can just fetch the owner details once
+        // const owner = await db.selectFrom('users')
+        //     .where('id', '=', userId)
+        //     .select(['name', 'email'])
+        //     .executeTakeFirst();
+            
+        // // Combine tasks with owner details
+        // const tasksWithOwnerDetails = tasks.map(task => {
+        //     return {
+        //         ...task,
+        //         ownerName: owner?.name,
+        //         ownerEmail: owner?.email
+        //     };
+        // });
+        
+        // return tasksWithOwnerDetails;
     },
 
 }

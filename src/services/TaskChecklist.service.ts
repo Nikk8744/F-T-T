@@ -7,7 +7,6 @@ export const taskChecklistServices = {
         .select('ownerId')
         .where('id', '=', taskId)
         .executeTakeFirstOrThrow();
-        console.log({taskId, item, userId, task});
 
         if (task.ownerId !== userId) {
         throw new Error('Only task owner can add checklist items');
