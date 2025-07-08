@@ -106,24 +106,117 @@ export const logServices = {
   },
 
   async getLogById(logId: number) {
-    const log = await db.selectFrom('timelogs').selectAll().where('id', '=', logId).executeTakeFirst();
+    // const log = await db.selectFrom('timelogs').selectAll().where('id', '=', logId).executeTakeFirst();
+    const log = await db
+      .selectFrom('timelogs')
+      .leftJoin('users', 'users.id', 'timelogs.userId')
+      .leftJoin('projects', 'projects.id', 'timelogs.projectId')
+      .leftJoin('tasks', 'tasks.id', 'timelogs.taskId')
+      .select([
+        'timelogs.id',
+        'timelogs.name',
+        'timelogs.description',
+        'timelogs.startTime',
+        'timelogs.endTime',
+        'timelogs.timeSpent',
+        'timelogs.createdAt',
+        'timelogs.projectId',
+        'timelogs.taskId',
+        'timelogs.userId',
+        'users.name as userName',
+        'users.email as userEmail',
+        'projects.name as projectName',
+        'tasks.subject as taskName'
+      ])
+      .where('timelogs.id', '=', logId)
+      .executeTakeFirst();
     return log;
   },
 
   async getUserLogs(userId: number) {
-    const userLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.userId', '=', userId).execute();
+    // const userLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.userId', '=', userId).execute();
+    const userLogs = await db
+      .selectFrom('timelogs')
+      .leftJoin('users', 'users.id', 'timelogs.userId')
+      .leftJoin('projects', 'projects.id', 'timelogs.projectId')
+      .leftJoin('tasks', 'tasks.id', 'timelogs.taskId')
+      .select([
+        'timelogs.id',
+        'timelogs.name',
+        'timelogs.description',
+        'timelogs.startTime',
+        'timelogs.endTime',
+        'timelogs.timeSpent',
+        'timelogs.createdAt',
+        'timelogs.projectId',
+        'timelogs.taskId',
+        'timelogs.userId',
+        'users.name as userName',
+        'users.email as userEmail',
+        'projects.name as projectName',
+        'tasks.subject as taskName'
+      ])
+      .where('timelogs.userId', '=', userId)
+      .orderBy('timelogs.startTime', 'desc')
+      .execute();
     return userLogs;
   },
 
   async getProjectLogs(projectId: number) {
-    const projectLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.projectId', '=', projectId).execute();
+    const projectLogs = await db
+      .selectFrom('timelogs')
+      .leftJoin('users', 'users.id', 'timelogs.userId')
+      .leftJoin('projects', 'projects.id', 'timelogs.projectId')
+      .leftJoin('tasks', 'tasks.id', 'timelogs.taskId')
+      .select([
+        'timelogs.id',
+        'timelogs.name',
+        'timelogs.description',
+        'timelogs.startTime',
+        'timelogs.endTime',
+        'timelogs.timeSpent',
+        'timelogs.createdAt',
+        'timelogs.projectId',
+        'timelogs.taskId',
+        'timelogs.userId',
+        'users.name as userName',
+        'users.email as userEmail',
+        'projects.name as projectName',
+        'tasks.subject as taskName'
+      ])
+      .where('timelogs.projectId', '=', projectId)
+      .orderBy('timelogs.startTime', 'desc')
+      .execute();
     return projectLogs;
   },
 
   async getTaskLogs(taskId: number) {
-    const taskLogs = await db.selectFrom('timelogs').selectAll().where('timelogs.taskId', '=', taskId).execute();
+    const taskLogs = await db
+      .selectFrom('timelogs')
+      .leftJoin('users', 'users.id', 'timelogs.userId')
+      .leftJoin('projects', 'projects.id', 'timelogs.projectId')
+      .leftJoin('tasks', 'tasks.id', 'timelogs.taskId')
+      .select([
+        'timelogs.id',
+        'timelogs.name',
+        'timelogs.description',
+        'timelogs.startTime',
+        'timelogs.endTime',
+        'timelogs.timeSpent',
+        'timelogs.createdAt',
+        'timelogs.projectId',
+        'timelogs.taskId',
+        'timelogs.userId',
+        'users.name as userName',
+        'users.email as userEmail',
+        'projects.name as projectName',
+        'tasks.subject as taskName'
+      ])
+      .where('timelogs.taskId', '=', taskId)
+      .orderBy('timelogs.startTime', 'desc')
+      .execute();
     return taskLogs;
-   },
+  },
 
   async deleteLog(logId: number) {
     

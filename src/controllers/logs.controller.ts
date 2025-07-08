@@ -67,23 +67,25 @@ const getLogById = async (req: Request, res: Response) => {
         const logId = Number(req.params.logId);
         if (isNaN(logId) || logId <= 0) {
             res.status(400).json({ msg: "Invalid id" });
+            return;
         }
     
         const log = await logServices.getLogById(logId);
         if (!log) {
             res.status(404).json({ msg: "Log not found" });
+            return;
         }
     
         res.status(200).json({
             msg: "Log found successfully",
             data: log
-        })
+        });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ msg: error.message });
             return;
         }
-        res.status(500).json({ error: 'Failed to fetch the log' })
+        res.status(500).json({ error: 'Failed to fetch the log' });
     }
 };
 
@@ -92,23 +94,28 @@ const getUserLogs = async (req: Request, res: Response) => {
         const userId = Number(req.user?.id);
         if (isNaN(userId) || userId <= 0) {
             res.status(400).json({ msg: "Invalid id" });
+            return;
         }
     
         const userLogs = await logServices.getUserLogs(userId);
-        if (!userLogs) {
-            res.status(404).json({ msg: "User logs not found" });
+        if (!userLogs || userLogs.length === 0) {
+            res.status(200).json({
+                msg: "No logs found for this user",
+                data: []
+            });
+            return;
         }
     
         res.status(200).json({
             msg: "User logs found successfully",
             data: userLogs
-        })
+        });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ msg: error.message });
             return;
         }
-        res.status(500).json({ error: 'Failed to get user logs' })
+        res.status(500).json({ error: 'Failed to get user logs' });
     }
 };
 
@@ -117,23 +124,28 @@ const getProjectLogs = async (req: Request, res: Response) => {
         const projectId = Number(req.params.projectId);
         if (isNaN(projectId) || projectId <= 0) {
             res.status(400).json({ msg: "Invalid id" });
+            return;
         }
     
         const projectLogs = await logServices.getProjectLogs(projectId);
-        if (!projectLogs) {
-            res.status(404).json({ msg: "User logs not found" });
+        if (!projectLogs || projectLogs.length === 0) {
+            res.status(200).json({
+                msg: "No logs found for this project",
+                data: []
+            });
+            return;
         }
     
         res.status(200).json({
             msg: "Project's logs fetched successfully",
             data: projectLogs
-        })
+        });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ msg: error.message });
             return;
         }
-        res.status(500).json({ error: 'Failed to get Project Logs' })
+        res.status(500).json({ error: 'Failed to get Project Logs' });
     }
 };
 
@@ -142,23 +154,28 @@ const getTaskLogs = async (req: Request, res: Response) => {
         const taskId = Number(req.params.taskId);
         if (isNaN(taskId) || taskId <= 0) {
             res.status(400).json({ msg: "Invalid id" });
+            return;
         }
 
         const taskLogs = await logServices.getTaskLogs(taskId);
-        if (!taskLogs) {
-            res.status(404).json({ msg: "User logs not found" });
+        if (!taskLogs || taskLogs.length === 0) {
+            res.status(200).json({
+                msg: "No logs found for this task",
+                data: []
+            });
+            return;
         }
 
         res.status(200).json({
             msg: "Task's logs fetched successfully",
             data: taskLogs
-        })
+        });
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ msg: error.message });
             return;
         }
-        res.status(500).json({ error: 'Failed to get Task Logs' })
+        res.status(500).json({ error: 'Failed to get Task Logs' });
     }
 };
 

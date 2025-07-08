@@ -78,8 +78,8 @@ export async function seedDatabase() {
             }
         }
 
-        // Get current date (20/06/2025)
-        const currentDate = new Date('2025-06-20');
+        // Get current date (07/07/2025)
+        const currentDate = new Date('2025-07-07');
         
         // Seed projects
         console.log('Seeding projects...');
@@ -87,29 +87,132 @@ export async function seedDatabase() {
             {
                 name: 'Website Redesign',
                 description: 'Complete redesign of the company website with modern UI/UX',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // May 15, 2025
-                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 30), // August 30, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 15), // May 15, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 30), // August 30, 2025
                 status: 'In-Progress',
                 ownerId: insertedUsers[0].id,
-                totalHours: 120.5
+                totalHours: 120.5,
+                completedAt: null
             },
             {
                 name: 'Mobile App Development',
                 description: 'Develop a cross-platform mobile app for iOS and Android',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1), // June 1, 2025
-                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 3, 15), // September 15, 2025
-                status: 'Pending',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1), // June 1, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 15), // September 15, 2025
+                status: 'In-Progress',
                 ownerId: insertedUsers[1].id,
-                totalHours: 85.25
+                totalHours: 85.25,
+                completedAt: null
             },
             {
                 name: 'Database Migration',
                 description: 'Migrate from legacy database to new cloud-based solution',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 10), // April 10, 2025
-                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // July 10, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, 10), // April 10, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 10), // July 10, 2025
                 status: 'Completed',
                 ownerId: insertedUsers[2].id,
-                totalHours: 210.75
+                totalHours: 210.75,
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 5) // July 5, 2025
+            },
+            {
+                name: 'E-commerce Platform',
+                description: 'Build a complete e-commerce solution with payment integration',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // June 15, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 20), // September 20, 2025
+                status: 'In-Progress',
+                ownerId: insertedUsers[1].id,
+                totalHours: 150.0,
+                completedAt: null
+            },
+            {
+                name: 'CRM Integration',
+                description: 'Integrate existing systems with new CRM platform',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 5), // May 5, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
+                status: 'In-Progress',
+                ownerId: insertedUsers[1].id,
+                totalHours: 95.5,
+                completedAt: null
+            },
+            {
+                name: 'Data Analytics Dashboard',
+                description: 'Create interactive analytics dashboard for business metrics',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, 20), // April 20, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 25), // June 25, 2025
+                status: 'Completed',
+                ownerId: insertedUsers[1].id,
+                totalHours: 78.25,
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 22) // June 22, 2025
+            },
+            {
+                name: 'API Gateway Implementation',
+                description: 'Implement API gateway for microservices architecture',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 1), // July 1, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // August 10, 2025
+                status: 'Pending',
+                ownerId: insertedUsers[1].id,
+                totalHours: 0,
+                completedAt: null
+            },
+            {
+                name: 'DevOps Pipeline Upgrade',
+                description: 'Upgrade CI/CD pipeline for faster deployments',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // June 10, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 25), // July 25, 2025
+                status: 'In-Progress',
+                ownerId: insertedUsers[2].id,
+                totalHours: 45.75,
+                completedAt: null
+            },
+            {
+                name: 'Security Audit',
+                description: 'Conduct comprehensive security audit and implement fixes',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1), // May 1, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // June 15, 2025
+                status: 'Completed',
+                ownerId: insertedUsers[0].id,
+                totalHours: 65.0,
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 12) // June 12, 2025
+            },
+            {
+                name: 'Content Management System',
+                description: 'Develop custom CMS for marketing team',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 5), // July 5, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 5), // September 5, 2025
+                status: 'Pending',
+                ownerId: insertedUsers[1].id,
+                totalHours: 0,
+                completedAt: null
+            },
+            {
+                name: 'Mobile App Redesign',
+                description: 'Redesign existing mobile app with new branding',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20), // June 20, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 15), // August 15, 2025
+                status: 'In-Progress',
+                ownerId: insertedUsers[3].id,
+                totalHours: 32.5,
+                completedAt: null
+            },
+            {
+                name: 'Customer Support Portal',
+                description: 'Build customer support portal with ticketing system',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 10), // May 10, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 20), // July 20, 2025
+                status: 'In-Progress',
+                ownerId: insertedUsers[1].id,
+                totalHours: 87.25,
+                completedAt: null
+            },
+            {
+                name: 'Legacy System Migration',
+                description: 'Migrate from legacy systems to modern architecture',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, 15), // April 15, 2025
+                endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 30), // June 30, 2025
+                status: 'Completed',
+                ownerId: insertedUsers[1].id,
+                totalHours: 145.0,
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 28) // June 28, 2025
             }
         ];
 
@@ -149,71 +252,241 @@ export async function seedDatabase() {
                 subject: 'Design Homepage Mockup',
                 description: 'Create mockups for the new homepage design',
                 status: 'Done',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20), // May 20, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 5), // June 5, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 20), // May 20, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 5), // June 5, 2025
                 totalTimeSpent: 28800, // 8 hours in seconds
                 ownerId: insertedUsers[0].id,
-                projectId: insertedProjects[0].id
+                projectId: insertedProjects[0].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 3) // June 3, 2025
             },
             {
                 subject: 'Implement User Authentication',
                 description: 'Set up secure user authentication system',
                 status: 'In-Progress',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10), // June 10, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 25), // June 25, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // June 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 25), // July 25, 2025
                 totalTimeSpent: 43200, // 12 hours in seconds
                 ownerId: insertedUsers[1].id,
-                projectId: insertedProjects[0].id
+                projectId: insertedProjects[0].id,
+                priority: 'High',
+                completedAt: null
             },
             {
                 subject: 'Create API Documentation',
                 description: 'Document all API endpoints and usage examples',
                 status: 'Pending',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 15), // June 15, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 5), // July 5, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // June 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
                 totalTimeSpent: 0,
                 ownerId: insertedUsers[2].id,
-                projectId: insertedProjects[0].id
+                projectId: insertedProjects[0].id,
+                priority: 'Medium',
+                completedAt: null
             },
             {
                 subject: 'Design App UI',
                 description: 'Create UI design for the mobile app',
                 status: 'In-Progress',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 5), // June 5, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // July 10, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 5), // June 5, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 10), // July 10, 2025
                 totalTimeSpent: 18000, // 5 hours in seconds
                 ownerId: insertedUsers[1].id,
-                projectId: insertedProjects[1].id
+                projectId: insertedProjects[1].id,
+                priority: 'Medium',
+                completedAt: null
             },
             {
                 subject: 'Implement Push Notifications',
                 description: 'Set up push notification system for mobile app',
                 status: 'Pending',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1), // July 1, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 20), // July 20, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 1), // July 1, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 20), // July 20, 2025
                 totalTimeSpent: 0,
                 ownerId: insertedUsers[2].id,
-                projectId: insertedProjects[1].id
+                projectId: insertedProjects[1].id,
+                priority: 'Low',
+                completedAt: null
             },
             {
                 subject: 'Database Schema Design',
                 description: 'Design schema for the new database',
                 status: 'Done',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 15), // April 15, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 5), // May 5, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, 15), // April 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 5), // May 5, 2025
                 totalTimeSpent: 36000, // 10 hours in seconds
                 ownerId: insertedUsers[2].id,
-                projectId: insertedProjects[2].id
+                projectId: insertedProjects[2].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 3) // May 3, 2025
             },
             {
                 subject: 'Data Migration Script',
                 description: 'Write script to migrate data from old to new database',
                 status: 'Done',
-                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // May 10, 2025
-                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 10), // June 10, 2025
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 10), // May 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // June 10, 2025
                 totalTimeSpent: 72000, // 20 hours in seconds
                 ownerId: insertedUsers[3].id,
-                projectId: insertedProjects[2].id
+                projectId: insertedProjects[2].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 8) // June 8, 2025
+            },
+            {
+                subject: 'Implement Payment Gateway',
+                description: 'Integrate payment gateway for e-commerce transactions',
+                status: 'In-Progress',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 2), // July 2, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 25), // July 25, 2025
+                totalTimeSpent: 14400, // 4 hours in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[3].id,
+                priority: 'High',
+                completedAt: null
+            },
+            {
+                subject: 'Product Catalog Frontend',
+                description: 'Build frontend components for product catalog',
+                status: 'Pending',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 10), // July 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 5), // August 5, 2025
+                totalTimeSpent: 0,
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[3].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'Shopping Cart Implementation',
+                description: 'Implement shopping cart functionality with local storage',
+                status: 'Pending',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 10), // August 10, 2025
+                totalTimeSpent: 0,
+                ownerId: insertedUsers[2].id,
+                projectId: insertedProjects[3].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'CRM Data Import',
+                description: 'Import existing customer data into new CRM',
+                status: 'Done',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20), // June 20, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 5), // July 5, 2025
+                totalTimeSpent: 25200, // 7 hours in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[4].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 4) // July 4, 2025
+            },
+            {
+                subject: 'CRM User Interface',
+                description: 'Design and implement CRM user interface',
+                status: 'In-Progress',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 6), // July 6, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 14), // July 14, 2025
+                totalTimeSpent: 3600, // 1 hour in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[4].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'Sales Dashboard',
+                description: 'Create interactive sales dashboard with charts',
+                status: 'Done',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 25), // May 25, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 20), // June 20, 2025
+                totalTimeSpent: 32400, // 9 hours in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[5].id,
+                priority: 'Medium',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 18) // June 18, 2025
+            },
+            {
+                subject: 'User Analytics Module',
+                description: 'Implement user behavior analytics module',
+                status: 'Done',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 10), // May 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 15), // June 15, 2025
+                totalTimeSpent: 28800, // 8 hours in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[5].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 14) // June 14, 2025
+            },
+            {
+                subject: 'API Gateway Setup',
+                description: 'Set up and configure API gateway',
+                status: 'Pending',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 10), // July 10, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 25), // July 25, 2025
+                totalTimeSpent: 0,
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[6].id,
+                priority: 'High',
+                completedAt: null
+            },
+            {
+                subject: 'CI Pipeline Configuration',
+                description: 'Configure CI pipeline for automated testing',
+                status: 'In-Progress',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 5), // July 5, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
+                totalTimeSpent: 10800, // 3 hours in seconds
+                ownerId: insertedUsers[2].id,
+                projectId: insertedProjects[7].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'Security Vulnerability Scan',
+                description: 'Perform security vulnerability scan and report findings',
+                status: 'Done',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 5), // May 5, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 10), // June 10, 2025
+                totalTimeSpent: 21600, // 6 hours in seconds
+                ownerId: insertedUsers[0].id,
+                projectId: insertedProjects[8].id,
+                priority: 'High',
+                completedAt: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 8) // June 8, 2025
+            },
+            {
+                subject: 'CMS Content Types',
+                description: 'Define and implement CMS content types',
+                status: 'Pending',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 5), // August 5, 2025
+                totalTimeSpent: 0,
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[9].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'Mobile UI Components',
+                description: 'Create reusable UI components for mobile app',
+                status: 'In-Progress',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 0, 1), // July 1, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 20), // July 20, 2025
+                totalTimeSpent: 18000, // 5 hours in seconds
+                ownerId: insertedUsers[3].id,
+                projectId: insertedProjects[10].id,
+                priority: 'Medium',
+                completedAt: null
+            },
+            {
+                subject: 'Support Ticket System',
+                description: 'Implement support ticket management system',
+                status: 'In-Progress',
+                startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 25), // June 25, 2025
+                dueDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 0, 15), // July 15, 2025
+                totalTimeSpent: 32400, // 9 hours in seconds
+                ownerId: insertedUsers[1].id,
+                projectId: insertedProjects[11].id,
+                priority: 'High',
+                completedAt: null
             }
         ];
 
