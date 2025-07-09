@@ -273,6 +273,27 @@ const getTotalTimeSpentToday = async (req: Request, res: Response) => {
     }
 };
 
+const getWeeklySummary = async (req: Request, res: Response) => {
+    try {
+        const userId = Number(req.user?.id);
+        if (isNaN(userId) || userId <= 0) {
+            res.status(400).json({ msg: "Invalid user id" });
+            return;
+        }
+        const summary = await logServices.getWeeklySummary(userId);
+        res.status(200).json({
+            msg: "Weekly summary fetched successfully",
+            data: summary
+        });
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(400).json({ msg: error.message });
+            return;
+        }
+        res.status(500).json({ error: 'Failed to get weekly summary' });
+    }
+};
+
 export {
     startTimeLog,
     stopTimeLog,
@@ -282,5 +303,6 @@ export {
     getTaskLogs,
     deleteTimeLog,
     updateTimeLog,
-    getTotalTimeSpentToday
-}
+    getTotalTimeSpentToday,
+    getWeeklySummary,
+};

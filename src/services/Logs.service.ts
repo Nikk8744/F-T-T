@@ -334,6 +334,50 @@ export const logServices = {
     };
   },
 
+  async getWeeklySummary(userId: number) {
+    // Get the start and end of the current week (Monday to Sunday)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 (Sun) - 6 (Sat)
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    // Query: sum timeSpent for each day in the week for this user
+    const results = await db
+      .selectFrom('timelogs')
+      .select([
+        sql`DATE(startTime)`.
+          as('date'),
+        sql`SUM(timeSpent)`.
+          as('totalTime')
+      ])
+      .where('userId', '=', userId)
+      .where('startTime', '>=', monday)
+      .where('startTime', '<=', sunday)
+      .groupBy(sql`DATE(startTime)`)
+      .orderBy(sql`DATE(startTime)`)
+      .execute();
+
+      console.log("🚀 ~ getWeeklySummary ~ results:", results)
+    // Fill in missing days with totalTime: 0
+    const summary = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      const dateStr = date.toISOString().slice(0, 10);
+      const found = results.find(r => String(r.date).slice(0, 10) === dateStr);
+      summary.push({
+        date: dateStr,
+        totalTime: found ? Number(found.totalTime) : 0
+      });
+    }
+        console.log("🚀 ~ getWeeklySummary ~ summary:", summary)
+    return summary;
+  },
+
   formatTimeSpent(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
