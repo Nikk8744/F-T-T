@@ -335,24 +335,21 @@ export const logServices = {
   },
 
   async getWeeklySummary(userId: number) {
-    // Get the start and end of the current week (Monday to Sunday)
+    // Get the start and end of the current week (Monday to Sunday) in UTC
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 (Sun) - 6 (Sat)
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
-    monday.setHours(0, 0, 0, 0);
+    const utcDay = now.getUTCDay(); // 0 (Sun) - 6 (Sat)
+    const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - ((utcDay + 6) % 7)));
+    monday.setUTCHours(0, 0, 0, 0);
     const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
 
     // Query: sum timeSpent for each day in the week for this user
     const results = await db
       .selectFrom('timelogs')
       .select([
-        sql`DATE(startTime)`.
-          as('date'),
-        sql`SUM(timeSpent)`.
-          as('totalTime')
+        sql`DATE(startTime)`.as('date'),
+        sql`SUM(timeSpent)`.as('totalTime')
       ])
       .where('userId', '=', userId)
       .where('startTime', '>=', monday)
@@ -361,20 +358,23 @@ export const logServices = {
       .orderBy(sql`DATE(startTime)`)
       .execute();
 
-      console.log("🚀 ~ getWeeklySummary ~ results:", results)
-    // Fill in missing days with totalTime: 0
+    // Build summary for each day (UTC)
     const summary = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const dateStr = date.toISOString().slice(0, 10);
-      const found = results.find(r => String(r.date).slice(0, 10) === dateStr);
+      date.setUTCDate(monday.getUTCDate() + i);
+      const dateStr = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      const found = results.find(r => {
+        if (r.date instanceof Date) {
+          return r.date.toISOString().slice(0, 10) === dateStr;
+        }
+        return String(r.date).slice(0, 10) === dateStr;
+      });
       summary.push({
         date: dateStr,
         totalTime: found ? Number(found.totalTime) : 0
       });
     }
-        console.log("🚀 ~ getWeeklySummary ~ summary:", summary)
     return summary;
   },
 
